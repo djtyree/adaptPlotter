@@ -1,0 +1,37 @@
+{% extends "layout.html" %}
+{% block page_header %}
+{% endblock %}
+{% block admin_body %}
+  <h3 class=page-title>Node Page</h3>    
+  <div id="runs">
+    <table class="dceweb-table">
+      <thead>
+        <tr>
+          <th class=node-id>ID</th>   
+          <th class=node-name>Name</th>                  
+          <th class=node-leader>Leader</th>
+          <th class=node-edit>Edit</th>    
+          <th class=node-delete>Delete</th>          
+        </tr>
+      </thead>
+      <tbody>
+        {% if nodes is defined %}          
+          {% for node in nodes %}
+            <tr>
+              <td class=node-id>{{ run.id }}</td>
+              <td class=node-name>{{ node.name }}</td>           
+              <td class=node-leader>{{ node.leader }}</td>                                   
+              <td><button id="run-edit-{{ node.id }}" class="node-edit btn-small"><a href="{{ url_for('editNodePage', node_id=node.id) }}">edit</a></button></td>                   
+              <td><button id="run-delete-{{ node.id }}" class="node-delete btn-small">delete</button></td>              
+            </tr>	          
+          {% else %}
+            <tr>
+              <td colspan=5>No Nodes have been created.</td>
+            </tr>
+          {% endfor %}
+        {% endif %}
+      </tbody>
+    </table>
+    <button class='btn new-node new-item'><a href="{{ url_for('newNodePage') }}">New</a></button>
+  </div>
+{% endblock %}

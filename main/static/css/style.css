@@ -1,0 +1,154 @@
+body { 
+	font-family: sans-serif; 
+	background: #eee; 
+}
+a, h1, h2 { 
+	color: #377ba8; 
+}
+h1, h2 { 
+	font-family: 'Georgia', serif; 
+	margin: 0; 
+}
+
+h2 { 
+	font-size: 1.2em; 
+}
+.page { 
+	margin: 2em auto; 
+	width: 1000px; 
+	border: 5px solid #ccc;
+    background: white; 
+}
+.page-header {
+  background-color: #E6E6FA;
+  padding: 0;
+  margin: 0;
+}
+.metanav {
+	text-align: right; 
+	font-size: 0.8em; 
+	padding: 0.3em;
+	margin-bottom: 1em;
+	background: #fafafa; 
+}
+
+.flash { 
+	background: #cee5F5; 
+	padding: 0.5em;
+    border: 1px solid #aacbe2;
+}
+.flash.error {
+	background: #F00;
+  	padding: 0.5em;
+ 	 font-weight: bold;
+  	color: white;
+}
+
+.flash.warning {
+	background: #F66733;
+  	padding: 0.5em;
+ 	 font-weight: bold;
+  	color: white;
+}
+
+.page-title,
+svg .title,
+#site-title {
+	text-align: center;
+	padding: 5px;
+	color: #377ba8; 	
+}
+.page-title {
+  font-size: 25px;
+}
+#site-title a {
+	text-decoration: none;
+	margin: 0;
+	font-weight: bold; 
+	font-size: 40px; 
+	text-shadow: rgba(0,0,0,.4) 0px 2px 5px;
+}
+
+.main-content {
+  padding: 10px;
+}
+
+.container {
+  position: relative;
+}
+
+.pagination-page-info-old {
+    padding: .6em;
+    padding-left: 0;
+    width:inherit;
+    float: right;
+    
+    
+}
+
+.pagination-page-info-new {
+    padding: .6em;
+    padding-left: 0;
+    width:inherit;
+    float: left;
+    
+    
+}
+
+/* -------------------------- */
+/* ---------- Menus --------- */
+/* -------------------------- */
+ 
+.nav ul {
+  list-style: none;
+  background-color: #666;
+  text-align: center;
+  padding: 0;
+  margin: 0;
+  border-top: 1px solid black;
+  border-bottom: 1px solid black;
+}
+.nav li {
+  font-family: 'Oswald', sans-serif;
+  font-size: 1.2em;
+  line-height: 40px;
+  height: 40px;
+  border-right: 1px solid #888;
+  width: 100px;
+  display: inline-block;
+  margin-right: -4px;
+}
+.nav li:first-child {
+  border-left: 1px solid #888;
+  maring-right: 0;
+}
+
+.nav a {
+  text-decoration: none;
+  color: #fff;
+  display: block;
+  transition: .3s background-color;
+}
+ 
+.nav a:hover {
+  background-color: #005f5f;
+}
+ 
+.nav li.active {
+  background-color: #88c;
+  color: #444;
+  cursor: default;
+}
+
+
+/* -------------------------- */
+/* ---------- Charts -------- */
+/* -------------------------- */
+
+.highcharts-container{
+	width:100% !important; 
+	height:100% !important;
+	}
+#chart {
+	height: 400px;
+}

@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+
+{% block page_header %}
+<script type="text/javascript" src="{{ url_for('static', filename='js/highcharts.js') }}"></script>
+<script type="text/javascript" src="{{ url_for('static', filename='js/home.js') }}"></script>
+{% endblock %}
+
+
+{% block body %}
+<div class="container clearfix one-column">
+  <div class=content>
+    <h3 class=page-title>Home</h3>
+    <div id="chart"></div>
+  </div>
+</div>
+{% endblock %}
