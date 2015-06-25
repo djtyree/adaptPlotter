@@ -41,8 +41,10 @@ class Node(Object):
     # columns
     id = db.Column(db.Integer(), db.ForeignKey('object.id'), primary_key=True)
     name = db.Column(db.String(64))
-    leader_id = db.Column(db.Integer())    
+    leader_id = db.Column(db.Integer(), db.ForeignKey('node.id'))
+    followers = db.relationship("Node",backref=db.backref("leader", remote_side='Node.id'), foreign_keys='Node.leader_id')
     loc_id = db.Column(db.Integer, db.ForeignKey('location.id'))
+    location = db.relationship("Location",backref=db.backref("node", uselist=False))
     
     # inheritance
     __mapper_args__ = {
@@ -51,14 +53,10 @@ class Node(Object):
     
     # class functions
     def isLeader(self):
-        if self.id == self.leader_id:
+        if self.leader_id == 0:
             return True
         else:
             return False
-        
-    def getLeader(self):
-        leader = db.Node.get(self.leader_id)
-        return leader
     
     def __repr__(self):
         return '<Object %s>' % (self.name)

@@ -7,8 +7,8 @@ class NodeForm(Form):
     new = HiddenField('New')
     name = TextField('Name',[validators.Required()])
     leader  = SelectField('Leader', choices=[], coerce=int)
-    lat = FloatField('Latitude', default=0,[validators.Required()])
-    lon = FloatField('Longitude', default=0,[validators.Required()])
+    lat = FloatField('Latitude', [validators.Required()])
+    lon = FloatField('Longitude', [validators.Required()])
     
     def validate(self):
         valid = True

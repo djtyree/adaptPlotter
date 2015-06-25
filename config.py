@@ -20,3 +20,14 @@ SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(BASE_DIR, 'app.db?check_sa
 SQLALCHEMY_MIGRATE_REPO = os.path.join(BASE_DIR, 'db_repository')
 
 PORT=5000
+
+# Enable protection agains *Cross-site Request Forgery (CSRF)*
+WTF_CSRF_ENABLED = True
+CSRF_ENABLED     = True
+
+# Use a secure, unique and absolutely secret key for
+# signing the data. * should update this
+CSRF_SESSION_KEY = "secret"
+
+# Secret key for signing cookies. * should update this
+SECRET_KEY = "secret"

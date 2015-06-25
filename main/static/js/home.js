@@ -1,5 +1,24 @@
 var chart;
 
+var utils = {};
+//Could create a utility function to do this
+utils.inArray = function(searchFor, property) {
+ var retVal = -1;
+ var self = this;
+ for(var index=0; index < self.length; index++){
+     var item = self[index];
+     if (item.hasOwnProperty(property)) {
+         if (item[property].toLowerCase() === searchFor.toLowerCase()) {
+             retVal = index;
+             return retVal;
+         }
+     }
+ };
+ return retVal;
+};
+//or we could create a function on the Array prototype indirectly
+Array.prototype.inArray = utils.inArray;
+
 /**
  * Request data from the server, add it to the graph and set a timeout 
  * to request again
@@ -8,13 +27,21 @@ function requestData() {
     $.ajax({
         url: 'data/all',
         success: function(response) {
-            var series = chart.series[0],
-                shift = series.data.length > 20; // shift if the series is 
-                                                 // longer than 20
 
             // add the point
-            $.each(response.data, function(index, value) {
-            	chart.series[0].addPoint(value, false);	
+            $.each(response.data, function(i, r_series) {
+            	var series_index = chart.series.inArray(r_series.name, "name")
+            	// series hasn't been created yet, create it now
+            	if(series_index = -1) {
+            		chart.addSeries(r_series);
+            		/*
+            		chart.series.push( { name: r_series.name, color: r_series.color, data: []});
+            		$.each(r_series.data, function(key, value) {
+            			chart.series[chart.series.length - 1]['data'].addPoint();
+            		});
+            		*/
+            	}
+            	//chart.series[0].addPoint(value, false);	
             });
             chart.redraw()
             
@@ -58,14 +85,14 @@ $(function () {
                     }
                 },
                 tooltip: {
-                    headerFormat: '<b>Location</b><br>',
-                    pointFormat: '{point.x}, {point.y}'
+                    headerFormat: '<b>{point.key}</b><br>',
+                    pointFormat: 'Location - ({point.x}, {point.y})'
                 }
-            }
+            },
+        	series: {
+        		shadow: true
+        	}
         },
-        series: [{
-            name: 'Random data',
-            data: []
-        }]
+        series: []
     });
 });

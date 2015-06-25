@@ -1,10 +1,10 @@
 {% extends "layout.html" %}
 {% block page_header %}
 {% endblock %}
-{% block admin_body %}
+{% block body %}
   <h3 class=page-title>Node Page</h3>    
-  <div id="runs">
-    <table class="dceweb-table">
+  <div id="nodes">
+    <table>
       <thead>
         <tr>
           <th class=node-id>ID</th>   
@@ -18,11 +18,15 @@
         {% if nodes is defined %}          
           {% for node in nodes %}
             <tr>
-              <td class=node-id>{{ run.id }}</td>
+              <td class=node-id>{{ node.id }}</td>
               <td class=node-name>{{ node.name }}</td>           
-              <td class=node-leader>{{ node.leader }}</td>                                   
-              <td><button id="run-edit-{{ node.id }}" class="node-edit btn-small"><a href="{{ url_for('editNodePage', node_id=node.id) }}">edit</a></button></td>                   
-              <td><button id="run-delete-{{ node.id }}" class="node-delete btn-small">delete</button></td>              
+              {% if node.leader_id == 0 %}
+              	<td class=node-leader>Self</td>
+              {% else %}
+              	<td class=node-leader>{{ node.leader.name }}</td>
+              {% endif %}	                                   
+              <td><button id="node-edit-{{ node.id }}" class="node-edit btn-small"><a href="{{ url_for('addEditNode', node_id=node.id) }}">edit</a></button></td>                   
+              <td><button id="node-delete-{{ node.id }}" class="node-delete btn-small">delete</button></td>              
             </tr>	          
           {% else %}
             <tr>
@@ -32,6 +36,6 @@
         {% endif %}
       </tbody>
     </table>
-    <button class='btn new-node new-item'><a href="{{ url_for('newNodePage') }}">New</a></button>
+    <button class='btn new-node new-item'><a href="{{ url_for('addEditNode') }}">New</a></button>
   </div>
 {% endblock %}
