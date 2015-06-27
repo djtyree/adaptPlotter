@@ -1,8 +1,9 @@
 from flask import render_template, jsonify, request, flash, redirect, url_for, json
 from main import app, db
-from models import Object, Node, Location
+from models import Object, Node, Location, Point
 from forms import NodeForm
 import random
+from main.forms import PointForm
 
 @app.route('/')
 @app.route('/index')
@@ -25,20 +26,20 @@ def getAllData():
     data = []
     objects = db.session.query(Object).all()
     
-    nodes = { 'name': 'Node', 'color': '#0000FF', 'data': [], 'marker': {'symbol': 'triangle'} } 
-    paths = { 'name': 'Paths', 'color': '#0000FF', 'data': [], 'marker': {'symbol': 'square'} }
-    points = { 'name': 'Points', 'color': '#00FF00', 'data': [], 'marker': {'symbol': 'circle'} }
+    nodes = { 'name': 'Node', 'color': '#AAAAAA', 'data': [], 'marker': {'symbol': 'triangle', 'radius': 6} } 
+    paths = { 'name': 'Paths', 'color': '#FF0000', 'data': [], 'marker': {'symbol': 'square', 'radius': 4} }
+    points = { 'name': 'Points', 'color': '#00FF00', 'data': [], 'marker': {'symbol': 'circle', 'radius': 3} }
     
     for obj in objects:
         if obj.type == 'node':
             if obj.isLeader():
-                nodes['data'].append(ChartPoint(obj.location.lat,obj.location.lon,'#FF0000', obj.name,'triangle-down' ).__dict__)
+                nodes['data'].append(ChartPoint(obj.location.lat,obj.location.lon,'#0000FF', obj.name,'triangle-down' ).__dict__)
             else:
                 nodes['data'].append(ChartPoint(x=obj.location.lat,y=obj.location.lon, name=obj.name).__dict__)
         elif obj.type == 'path':
             paths['data'].append(None)
         elif obj.type == 'point':    
-            points['data'].append(None)
+            points['data'].append(ChartPoint(x=obj.location.lat,y=obj.location.lon,name='Point - ' + str(obj.id)).__dict__)
     data = [nodes, paths, points]
     return jsonify({'status':'OK','data':data})
 
@@ -69,11 +70,39 @@ def addEditNode(node_id):
         return redirect(url_for("nodePage"))    
     return render_template("nodeForm.html", form=form)
 
+# Point Add/Edit Page
+@app.route('/point/add', defaults={'point_id': None}, methods=['GET', 'POST'])
+@app.route('/point/<int:point_id>/edit', methods=['GET', 'POST'])
+def addEditPoint(point_id):    
+    if point_id is None:
+        form = PointForm(new=True)
+    else:
+        form = PointForm(new=False)    
+    
+    if request.method == 'POST' and form.validate():  # @UndefinedVariable
+        #new point has passed validation, add to db
+        location = Location(lat=form.lat.data, lon=form.lon.data)
+        db.session.add(location)  # @UndefinedVariable
+        point= Point(location=location)
+        db.session.add(point)  # @UndefinedVariable
+        db.session.commit()  # @UndefinedVariable
+        flash("Point has beeen created")
+        
+        # after creating the new state, redirect them back to dce config page
+        return redirect(url_for("pointPage"))    
+    return render_template("pointForm.html", form=form)
+
 # Node View page
 @app.route('/node')
 def nodePage():    
     nodes = Node.query.all()    # @UndefinedVariable   
     return render_template('nodes.html', nodes=nodes)
+
+# Node View page
+@app.route('/point')
+def pointPage():    
+    points = Point.query.all()    # @UndefinedVariable   
+    return render_template('points.html', points=points)
 
 #####################################################################
 ###                      Helper Functions                         ###

@@ -3,19 +3,20 @@ var chart;
 var utils = {};
 //Could create a utility function to do this
 utils.inArray = function(searchFor, property) {
- var retVal = -1;
- var self = this;
- for(var index=0; index < self.length; index++){
-     var item = self[index];
-     if (item.hasOwnProperty(property)) {
-         if (item[property].toLowerCase() === searchFor.toLowerCase()) {
-             retVal = index;
-             return retVal;
-         }
-     }
- };
- return retVal;
+ 	var retVal = -1;
+ 	var self = this;
+ 	for(var index=0; index < self.length; index++){
+    	var item = self[index];
+     	if (item.hasOwnProperty(property)) {
+        	if (item[property].toLowerCase() === searchFor.toLowerCase()) {
+				retVal = index;
+             	return retVal;
+         	}
+     	}
+ 	};
+ 	return retVal;
 };
+
 //or we could create a function on the Array prototype indirectly
 Array.prototype.inArray = utils.inArray;
 
@@ -34,16 +35,15 @@ function requestData() {
             	// series hasn't been created yet, create it now
             	if(series_index = -1) {
             		chart.addSeries(r_series);
-            		/*
-            		chart.series.push( { name: r_series.name, color: r_series.color, data: []});
-            		$.each(r_series.data, function(key, value) {
-            			chart.series[chart.series.length - 1]['data'].addPoint();
-            		});
-            		*/
             	}
             	//chart.series[0].addPoint(value, false);	
             });
-            chart.redraw()
+            // add leader follower lines
+            //$.each(response.nodeLines, function(i, r_series) {
+            		// chart.addSeries(r_series);
+            //});
+            renderer.path(['M',3,3, 'L',50,50]).attr({'stroke-width': 4,stroke: 'red'}).add();
+            chart.redraw();
             
             // call it again after one second
             //setTimeout(requestData, 1000);    
@@ -53,6 +53,7 @@ function requestData() {
 }
 
 $(function () {
+
 	chart = new Highcharts.Chart({
         chart: {
         	renderTo: 'chart',
@@ -95,4 +96,9 @@ $(function () {
         },
         series: []
     });
+    renderer = new Highcharts.Renderer(
+        $('#chart')[0],
+        1000,
+        400
+    );
 });

@@ -16,3 +16,16 @@ class NodeForm(Form):
         if not rv:
             valid = False
         return valid
+    
+class PointForm(Form):
+    id = HiddenField('Id')
+    new = HiddenField('New')
+    lat = FloatField('Latitude', [validators.Required()])
+    lon = FloatField('Longitude', [validators.Required()])
+    
+    def validate(self):
+        valid = True
+        rv = Form.validate(self)
+        if not rv:
+            valid = False
+        return valid

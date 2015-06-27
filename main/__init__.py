@@ -13,10 +13,12 @@ migrate = Migrate(app, db)
 # Imports
 from main import models
 from main import views
-from rest import RestHelloWorld
+from main.rest import RestHelloWorld, RestNode, RestNodeList
 
 # setup RESTful API
 api.add_resource(RestHelloWorld, '/rest/api/hello')
+api.add_resource(RestNodeList, '/rest/api/nodes')
+api.add_resource(RestNode, '/rest/api/nodes/<int:node_id>')
 
 # used to manage the app
 manager = Manager(app)

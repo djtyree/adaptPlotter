@@ -69,6 +69,7 @@ class Point(Object):
     # columns
     id = db.Column(db.Integer(), db.ForeignKey('object.id'), primary_key=True)
     loc_id = db.Column(db.Integer(), db.ForeignKey('location.id'))
+    location = db.relationship("Location",backref=db.backref("point", uselist=False))
     
     # inheritance
     __mapper_args__ = {
@@ -87,6 +88,7 @@ class Path(Object):
     # columns
     id = db.Column(db.Integer(), db.ForeignKey('object.id'), primary_key=True)
     loc_id = db.Column(db.Integer(), db.ForeignKey('location.id'))
+    location = db.relationship("Location",backref=db.backref("path", uselist=False))
     
     # relationships
     points = db.relationship('PathPoint', backref='path')
