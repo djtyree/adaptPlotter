@@ -1,0 +1,35 @@
+{% extends "layout.html" %}
+{% block page_header %}
+{% endblock %}
+{% block body %}
+  <h3 class=page-title>Path Page</h3>    
+  <div id="paths">
+    <table>
+      <thead>
+        <tr>
+          <th class=path-id>ID</th>   
+          <th class=path-node>Node</th>                  
+          <th class=path-edit>Edit</th>    
+          <th class=path-delete>Delete</th>          
+        </tr>
+      </thead>
+      <tbody>
+        {% if paths is defined %}          
+          {% for path in paths %}
+            <tr>
+              <td class=path-id>{{ path.id }}</td>
+              <td class=path-lat>{{ path.node.name }}</td>           	                                   
+              <td><button id="path-edit-{{ path.id }}" class="path-edit btn-small"><a href="{{ url_for('addEditPath', path_id=path.id) }}">edit</a></button></td>                   
+              <td><button id="path-delete-{{ path.id }}" class="path-delete btn-small">delete</button></td>              
+            </tr>	          
+          {% else %}
+            <tr>
+              <td colspan=5>No paths have been created.</td>
+            </tr>
+          {% endfor %}
+        {% endif %}
+      </tbody>
+    </table>
+    <button class='btn new-path new-item'><a href="{{ url_for('addEditPath') }}">New</a></button>
+  </div>
+{% endblock %}

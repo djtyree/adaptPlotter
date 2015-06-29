@@ -91,12 +91,10 @@ class Path(Object):
     __tablename__ = 'path'
     
     # columns
-    id = db.Column(db.Integer(), db.ForeignKey('object.id'), primary_key=True)
-    loc_id = db.Column(db.Integer(), db.ForeignKey('location.id'))        
+    id = db.Column(db.Integer(), db.ForeignKey('object.id'), primary_key=True)        
     nid = db.Column(db.Integer(), db.ForeignKey('node.id'))
     
     # relationships    
-    location = db.relationship("Location",backref=db.backref("path", uselist=False))
     points = db.relationship('PathPoint', backref='path')
     
     # inheritance
@@ -106,7 +104,7 @@ class Path(Object):
     
     # class functions
     def __repr__(self):
-        return '<Point %d>' % (self.id)
+        return '<Path %d>' % (self.id)
     
 # Point Class
 class PathPoint(db.Model):

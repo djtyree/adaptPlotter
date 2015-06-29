@@ -1,9 +1,8 @@
 from flask import render_template, jsonify, request, flash, redirect, url_for, json
 from main import app, db
-from models import Object, Node, Location, Point
-from forms import NodeForm
+from models import Object, Node, Location, Point, Path
+from forms import NodeForm, PointForm, PathForm
 import random
-from main.forms import PointForm
 
 @app.route('/')
 def homePage():
@@ -64,13 +63,13 @@ def addEditNode(node_id):
             form.new.data = False
             form.id.data = node.id
             form.name.data = node.name
-            form.lat.data = node.location.lat
-            form.lon.data = node.location.lon
+            form.location.lat.data = node.location.lat
+            form.location.lon.data = node.location.lon
             form.leader.data = node.leader_id    
     elif request.method == 'POST' and form.validate():  # @UndefinedVariable
         if node is None:
             #new node has passed validation, add to db
-            location = Location(lat=form.lat.data, lon=form.lon.data)
+            location = Location(lat=form.location.lat.data, lon=form.location.lon.data)
             db.session.add(location)  # @UndefinedVariable
             node = Node(name=form.name.data, leader_id=form.leader.data, location=location)
             db.session.add(node)  # @UndefinedVariable
@@ -80,8 +79,8 @@ def addEditNode(node_id):
             #node has been updated. save updates
             node.name = form.name.data
             location = Location.query.get(node.loc_id)
-            location.lat = form.lat.data
-            location.lon = form.lon.data
+            location.lat = form.location.lat.data
+            location.lon = form.location.lon.data
             node.location = location
             node.leader_id = form.leader.data
             db.session.commit()  # @UndefinedVariable
@@ -106,12 +105,12 @@ def addEditPoint(point_id):
         else:  
             form.new.data = False    
             form.id.data = point.id
-            form.lat.data = point.location.lat
-            form.lon.data = point.location.lon    
+            form.location.lat.data = point.location.lat
+            form.location.lon.data = point.location.lon    
     if request.method == 'POST' and form.validate():  # @UndefinedVariable
         if point is None:
             #new point has passed validation, add to db
-            location = Location(lat=form.lat.data, lon=form.lon.data)
+            location = Location(lat=form.location.lat.data, lon=form.location.lon.data)
             db.session.add(location)  # @UndefinedVariable
             point= Point(location=location)
             db.session.add(point)  # @UndefinedVariable
@@ -120,8 +119,8 @@ def addEditPoint(point_id):
         else: 
             #node has been updated. save updates
             location = Location.query.get(point.loc_id)
-            location.lat = form.lat.data
-            location.lon = form.lon.data
+            location.lat = form.location.lat.data
+            location.lon = form.location.lon.data
             db.session.commit()  # @UndefinedVariable
             flash("Point has beeen updated")
         
@@ -129,17 +128,62 @@ def addEditPoint(point_id):
         return redirect(url_for("pointPage"))    
     return render_template("pointForm.html", form=form)
 
+# Path Add/Edit Page
+@app.route('/path/add', defaults={'path_id': None}, methods=['GET', 'POST'])
+@app.route('/path/<int:path_id>/edit', methods=['GET', 'POST'])
+def addEditPath(path_id):
+    path = None
+      
+    # get choices for node leaders
+    node_choices = [(0, 'Self')]
+    for x in Node.query.filter_by(leader_id=0):   # @UndefinedVariable
+        node_choices.append((x.id,x.name))
+    form = PathForm()
+    form.points.append_entry()
+    form.node.choices = node_choices
+    form.node.default = 0   
+    if path_id is not None:
+        path = Path.query.get(path_id)
+        
+    if request.method == 'GET':
+        if path is None:
+            form.new.data = True
+        else:  
+            form.new.data = False    
+            form.id.data = path.id
+            form.node.data = path.nid    
+    if request.method == 'POST' and form.validate():  # @UndefinedVariable
+        if path is None:
+            # path has been created.
+            #db.session.add(path)  # @UndefinedVariable
+            #db.session.commit()  # @UndefinedVariable
+            flash("Path has beeen created")
+        else: 
+            # path has been updated. save updates            
+            #db.session.commit()  # @UndefinedVariable
+            flash("Path has beeen updated")
+        
+        # after creating the new state, redirect them back to dce config page
+        return redirect(url_for("pathPage"))    
+    return render_template("pathForm.html", form=form)
+
 # Node View page
 @app.route('/node')
 def nodePage():    
     nodes = Node.query.all()    # @UndefinedVariable   
     return render_template('nodes.html', nodes=nodes)
 
-# Node View page
+# Point View page
 @app.route('/point')
 def pointPage():    
     points = Point.query.all()    # @UndefinedVariable   
     return render_template('points.html', points=points)
+
+# Point View page
+@app.route('/path')
+def pathPage():    
+    paths = Path.query.all()    # @UndefinedVariable   
+    return render_template('paths.html', paths=paths)
 
 #####################################################################
 ###                      Helper Functions                         ###

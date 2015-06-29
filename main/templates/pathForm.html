@@ -1,0 +1,42 @@
+{% from "__formhelpers.html" import render_field, render_multi_field %}
+{% extends "layout.html" %}
+{% block page_header %}
+  <script type="text/javascript" src="{{ url_for('static', filename='js/repeatable-fields.js') }}"></script>
+  <script type="text/javascript" src="{{ url_for('static', filename='js/path.js') }}"></script>
+{% endblock %}
+{% block body %}
+  <h3 class=page-title>Add New Node</h3>
+  {% if form.new.data %} 
+  	<form class='new-point' method=post action="{{ url_for('addEditPoint') }}">
+  {% else %}
+  	<form class='edit-point' method=post action="{{ url_for('addEditPoint', point_id=form.id.data) }}">
+  {% endif %}
+    {{ form.hidden_tag() }}
+    
+    <div class="repeat">
+      <table class="wrapper" width="100%">
+        <thead>
+          <tr>
+              <th width="10%" colspan="6"><span class="add">Add</span></th>
+          </tr>
+        </thead>
+        <tbody class="container">
+          <tr class="template row">
+            <td width="10%"><span class="move">Move</span></td>
+            <td width="10%">Latitude</td>
+            <td width="35%"><input type="text" id="points-{{ '{{' }}row-count-placeholder{{ '}}' }}-lat" name="points-{{ '{{' }}row-count-placeholder{{ '}}' }}-lat" /></td>
+            <td width="10%">Longitude</td>
+            <td width="35%"><input type="text" id="points-{{ '{{' }}row-count-placeholder{{ '}}' }}-lon" name="points-{{ '{{' }}row-count-placeholder{{ '}}' }}-lon" /></td>
+		    <td width="10%"><span class="remove">Remove</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div> 
+
+    {% if form.new.data %} 
+    	<input class="btn newPoint new-item" type=submit value=Submit>
+   	{% else %}
+   		<input class="btn editPoint edit-item" type=submit value=Submit>
+   	{% endif %}	
+  </form>
+{% endblock %}
