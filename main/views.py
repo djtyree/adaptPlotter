@@ -25,18 +25,18 @@ def getRandomData():
 def getAllData():    
     data = []
     objects = db.session.query(Object).all()
+    leaders = Node.query.filter_by(leader_id=0).all()
     
     nodes = { 'name': 'Node', 'color': '#AAAAAA', 'data': [], 'marker': {'symbol': 'triangle', 'radius': 6} } 
     paths = { 'name': 'Paths', 'color': '#FF0000', 'data': [], 'marker': {'symbol': 'square', 'radius': 4} }
     points = { 'name': 'Points', 'color': '#00FF00', 'data': [], 'marker': {'symbol': 'circle', 'radius': 3} }
     
+    for leader in leaders:
+        nodes['data'].append(ChartPoint(x=leader.location.lat,y=leader.location.lon,color='#0000FF', name=leader.name,nid=leader.id, size=8).__dict__)
+        for follower in leader.followers:
+            nodes['data'].append(ChartPoint(x=follower.location.lat,y=follower.location.lon, name=follower.name,nid=follower.id,lid=leader.id).__dict__)
     for obj in objects:
-        if obj.type == 'node':
-            if obj.isLeader():
-                nodes['data'].append(ChartPoint(obj.location.lat,obj.location.lon,'#0000FF', obj.name,'triangle-down' ).__dict__)
-            else:
-                nodes['data'].append(ChartPoint(x=obj.location.lat,y=obj.location.lon, name=obj.name).__dict__)
-        elif obj.type == 'path':
+        if obj.type == 'path':
             paths['data'].append(None)
         elif obj.type == 'point':    
             points['data'].append(ChartPoint(x=obj.location.lat,y=obj.location.lon,name='Point - ' + str(obj.id)).__dict__)
@@ -47,25 +47,42 @@ def getAllData():
 @app.route('/node/add', defaults={'node_id': None}, methods=['GET', 'POST'])
 @app.route('/node/<int:node_id>/edit', methods=['GET', 'POST'])
 def addEditNode(node_id):    
-    if node_id is None:
-        form = NodeForm(new=True)
-    else:
-        form = NodeForm(new=False)    
+    node = None
+    # get choices for node leaders
     leader_choices = [(0, 'Self')]
     for x in Node.query.all():   # @UndefinedVariable
         leader_choices.append((x.id,x.name))
+    form = NodeForm()
     form.leader.choices = leader_choices
-    form.leader.default = 0
-    
+    form.leader.default = 0    
+    if node_id is None:
+        form.new.data = True
+    else:
+        node = Node.query.get(node_id)
+        form.new.data = False
+        form.name.data = node.name
+        form.lat.data = node.location.lat
+        form.lon.data = node.location.lon
+        form.leader.data = node.leader_id    
+
     if request.method == 'POST' and form.validate():  # @UndefinedVariable
-        #new node has passed validation, add to db
-        location = Location(lat=form.lat.data, lon=form.lon.data)
-        db.session.add(location)  # @UndefinedVariable
-        node = Node(name=form.name.data, leader_id=form.leader.data, location=location)
-        db.session.add(node)  # @UndefinedVariable
-        db.session.commit()  # @UndefinedVariable
-        flash("Node has beeen created")
-        
+        if node is None:
+            #new node has passed validation, add to db
+            location = Location(lat=form.lat.data, lon=form.lon.data)
+            db.session.add(location)  # @UndefinedVariable
+            node = Node(name=form.name.data, leader_id=form.leader.data, location=location)
+            db.session.add(node)  # @UndefinedVariable
+            db.session.commit()  # @UndefinedVariable
+            flash("Node has beeen created")
+        else: 
+            #node has been updated. save updates
+            location = Location.query.get(node.loc_id)
+            location.lat = form.lat.data
+            location.lon = form.lon.data
+            node.leader_id = form.leader.data
+            db.session.commit()  # @UndefinedVariable
+            flash("Node has beeen updated")
+            
         # after creating the new state, redirect them back to dce config page
         return redirect(url_for("nodePage"))    
     return render_template("nodeForm.html", form=form)
@@ -73,20 +90,32 @@ def addEditNode(node_id):
 # Point Add/Edit Page
 @app.route('/point/add', defaults={'point_id': None}, methods=['GET', 'POST'])
 @app.route('/point/<int:point_id>/edit', methods=['GET', 'POST'])
-def addEditPoint(point_id):    
+def addEditPoint(point_id):
+    point = None
+    form = PointForm()    
     if point_id is None:
-        form = PointForm(new=True)
+        form.new.data = True
     else:
-        form = PointForm(new=False)    
-    
+        point = Point.query.get(point_id)
+        form.new.data = False    
+        form.lat.data = point.location.lat
+        form.lon.data = point.location.lon    
     if request.method == 'POST' and form.validate():  # @UndefinedVariable
-        #new point has passed validation, add to db
-        location = Location(lat=form.lat.data, lon=form.lon.data)
-        db.session.add(location)  # @UndefinedVariable
-        point= Point(location=location)
-        db.session.add(point)  # @UndefinedVariable
-        db.session.commit()  # @UndefinedVariable
-        flash("Point has beeen created")
+        if point is None:
+            #new point has passed validation, add to db
+            location = Location(lat=form.lat.data, lon=form.lon.data)
+            db.session.add(location)  # @UndefinedVariable
+            point= Point(location=location)
+            db.session.add(point)  # @UndefinedVariable
+            db.session.commit()  # @UndefinedVariable
+            flash("Point has beeen created")
+        else: 
+            #node has been updated. save updates
+            location = Location.query.get(point.loc_id)
+            location.lat = form.lat.data
+            location.lon = form.lon.data
+            db.session.commit()  # @UndefinedVariable
+            flash("Point has beeen updated")
         
         # after creating the new state, redirect them back to dce config page
         return redirect(url_for("pointPage"))    
@@ -109,18 +138,29 @@ def pointPage():
 #####################################################################
 
 class ChartPoint(object):
+    nid = 0
+    lid = 0
     x = 0
     y = 0
     color = ""
     name = ""
     marker = ""
+    size=6
      
-    def __init__(self, x, y, color=None, name=None, marker=None):
+    def __init__(self, x, y, color=None, name=None, symbol=None, nid=None, lid=None, size=None):
         self.x = x
         self.y = y
+        if nid is not None:
+            self.nid = nid
+        if lid is not None:
+            self.lid = lid
         if color is not None:
             self.color = color
         if name is not None:
             self.name = name
-        if marker is not None:
-            self.marker = { 'symbol': marker}
+        if symbol is not None or size is not None:
+            self.marker = {}
+            if symbol is not None:
+                self.marker['symbol'] = symbol
+            if size is not None:
+                self.marker['radius'] = size

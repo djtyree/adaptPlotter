@@ -20,6 +20,34 @@ utils.inArray = function(searchFor, property) {
 //or we could create a function on the Array prototype indirectly
 Array.prototype.inArray = utils.inArray;
 
+utils.findNode = function(series_index,nid) {
+	node_id = -1
+	$.each(chart.series[series_index].data, function(i, node) {
+		node_id = i;
+		return (node.nid != nid) ;
+	});
+	return node_id;
+};
+
+utils.drawNodeLinks = function() {
+	// link followers to leaders
+	$('.nodeLink').remove();
+    var series_index = chart.series.inArray('Node', "name")
+    $.each(chart.series[series_index].data, function(i, node) {
+    	if(node.lid !== undefined && node.lid != 0) {
+    		leader_id = utils.findNode(series_index, node.lid)
+    		leader = chart.series[series_index].data[leader_id]
+    		chart.renderer.path(['M',leader.plotX + chart.plotLeft, leader.plotY + chart.plotTop,
+    		                     'L',node.plotX + chart.plotLeft, node.plotY + chart.plotTop]).attr({
+    		                    	 'stroke-width': 1,
+    		                    	 stroke: 'black',
+    		                    	 dashstyle: 'dot',
+    		                    	 class: 'nodeLink'
+    		                    }).add();
+    	}
+    });	
+}
+
 /**
  * Request data from the server, add it to the graph and set a timeout 
  * to request again
@@ -37,12 +65,8 @@ function requestData() {
             		chart.addSeries(r_series);
             	}
             	//chart.series[0].addPoint(value, false);	
-            });
-            // add leader follower lines
-            //$.each(response.nodeLines, function(i, r_series) {
-            		// chart.addSeries(r_series);
-            //});
-            renderer.path(['M',3,3, 'L',50,50]).attr({'stroke-width': 4,stroke: 'red'}).add();
+            });                        
+
             chart.redraw();
             
             // call it again after one second
@@ -61,7 +85,8 @@ $(function () {
             zoomType: 'xy',
             width: 1000,
             events: {
-            	load: requestData
+            	load: requestData,
+                redraw: utils.drawNodeLinks,
             }
         },
         title: {

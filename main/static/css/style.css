@@ -150,5 +150,47 @@ svg .title,
 	height:100% !important;
 	}
 #chart {
-	height: 400px;
+	height: 600px;
 }
+
+/* -------------------------- */
+/* --------- Tables --------- */
+/* -------------------------- */
+
+  table {
+    margin: 10px auto;
+    border-collapse: collapse;
+    font-family: Arial, Helvetica, sans-serif;
+    border: 2px solid #95b3d7;
+    box-shadow: 3px 3px 5px #ccc;
+    width: 100%;
+  }
+  table th, table td { 
+    padding: 5px 10px;
+    text-align: center;
+  }
+  
+  table thead th {
+    background: #4f81bd;
+    text-transform: uppercase;
+    text-align: center;
+    font-size: 15px;
+    color: #fff;
+  }
+
+  table tbody tr {
+    border-bottom: 1px solid #95b3d7;
+  }
+  
+  table tbody tr:nth-child(odd) {
+    background: #dbe5f0;
+  }
+  
+  .dceweb-table#status tbody tr:nth-child(odd) {
+    background: #E5E5E5;
+  }
+  
+  table thead th,
+  table tbody tr td {
+    border-right: 1px solid #95b3d7;
+  }

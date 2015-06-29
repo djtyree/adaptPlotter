@@ -41,10 +41,13 @@ class Node(Object):
     # columns
     id = db.Column(db.Integer(), db.ForeignKey('object.id'), primary_key=True)
     name = db.Column(db.String(64))
-    leader_id = db.Column(db.Integer(), db.ForeignKey('node.id'))
-    followers = db.relationship("Node",backref=db.backref("leader", remote_side='Node.id'), foreign_keys='Node.leader_id')
+    leader_id = db.Column(db.Integer(), db.ForeignKey('node.id'))    
     loc_id = db.Column(db.Integer, db.ForeignKey('location.id'))
+    
+    # relationships
     location = db.relationship("Location",backref=db.backref("node", uselist=False))
+    followers = db.relationship("Node",backref=db.backref("leader", remote_side='Node.id'), foreign_keys='Node.leader_id')
+    path = db.relationship("Path",backref=db.backref("node", remote_side='Node.id'), foreign_keys='Path.nid')
     
     # inheritance
     __mapper_args__ = {
@@ -69,6 +72,8 @@ class Point(Object):
     # columns
     id = db.Column(db.Integer(), db.ForeignKey('object.id'), primary_key=True)
     loc_id = db.Column(db.Integer(), db.ForeignKey('location.id'))
+    
+    # relationships
     location = db.relationship("Location",backref=db.backref("point", uselist=False))
     
     # inheritance
@@ -87,10 +92,11 @@ class Path(Object):
     
     # columns
     id = db.Column(db.Integer(), db.ForeignKey('object.id'), primary_key=True)
-    loc_id = db.Column(db.Integer(), db.ForeignKey('location.id'))
-    location = db.relationship("Location",backref=db.backref("path", uselist=False))
+    loc_id = db.Column(db.Integer(), db.ForeignKey('location.id'))        
+    nid = db.Column(db.Integer(), db.ForeignKey('node.id'))
     
-    # relationships
+    # relationships    
+    location = db.relationship("Location",backref=db.backref("path", uselist=False))
     points = db.relationship('PathPoint', backref='path')
     
     # inheritance
