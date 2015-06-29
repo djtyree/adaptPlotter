@@ -3,11 +3,12 @@
 {% block page_header %}
 {% endblock %}
 {% block body %}
-  <h3 class=page-title>Add New Node</h3>
-  {% if form.new.data %} 
+  {% if form.new.data %}
+  	<h3 class=page-title>Add New Node</h3> 
   	<form class='new-node' method=post action="{{ url_for('addEditNode') }}">
   {% else %}
-  	<form class='edit-node' method=post action="{{ url_for('addEditNode', run_id=form.id.data) }}">
+  	<h3 class=page-title>Update Node</h3>
+  	<form class='edit-node' method=post action="{{ url_for('addEditNode', node_id=form.id.data) }}">
   {% endif %}
     {{ form.hidden_tag() }}
     <dl>
@@ -18,10 +19,6 @@
       <div class="node text lat">{{ render_field(form.lat) }}</div>      
       <div class="node text lon">{{ render_field(form.lon) }}</div>
     </dl>
-    {% if form.new.data %} 
-    	<input class="btn newNode new-item" type=submit value=Submit>
-   	{% else %}
-   		<input class="btn editNode edit-item" type=submit value=Submit>
-   	{% endif %}	
+    <input class="btn" type=submit value=Submit>
   </form>
 {% endblock %}

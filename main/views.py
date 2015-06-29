@@ -6,7 +6,6 @@ import random
 from main.forms import PointForm
 
 @app.route('/')
-@app.route('/index')
 def homePage():
     return render_template('home.html')
 
@@ -50,22 +49,25 @@ def addEditNode(node_id):
     node = None
     # get choices for node leaders
     leader_choices = [(0, 'Self')]
-    for x in Node.query.all():   # @UndefinedVariable
+    for x in Node.query.filter_by(leader_id=0):   # @UndefinedVariable
         leader_choices.append((x.id,x.name))
     form = NodeForm()
     form.leader.choices = leader_choices
     form.leader.default = 0    
-    if node_id is None:
-        form.new.data = True
-    else:
+    if node_id is not None:
         node = Node.query.get(node_id)
-        form.new.data = False
-        form.name.data = node.name
-        form.lat.data = node.location.lat
-        form.lon.data = node.location.lon
-        form.leader.data = node.leader_id    
-
-    if request.method == 'POST' and form.validate():  # @UndefinedVariable
+        
+    if request.method == 'GET':
+        if node is None:
+            form.new.data = True
+        else:
+            form.new.data = False
+            form.id.data = node.id
+            form.name.data = node.name
+            form.lat.data = node.location.lat
+            form.lon.data = node.location.lon
+            form.leader.data = node.leader_id    
+    elif request.method == 'POST' and form.validate():  # @UndefinedVariable
         if node is None:
             #new node has passed validation, add to db
             location = Location(lat=form.lat.data, lon=form.lon.data)
@@ -76,9 +78,11 @@ def addEditNode(node_id):
             flash("Node has beeen created")
         else: 
             #node has been updated. save updates
+            node.name = form.name.data
             location = Location.query.get(node.loc_id)
             location.lat = form.lat.data
             location.lon = form.lon.data
+            node.location = location
             node.leader_id = form.leader.data
             db.session.commit()  # @UndefinedVariable
             flash("Node has beeen updated")
@@ -92,14 +96,18 @@ def addEditNode(node_id):
 @app.route('/point/<int:point_id>/edit', methods=['GET', 'POST'])
 def addEditPoint(point_id):
     point = None
-    form = PointForm()    
-    if point_id is None:
-        form.new.data = True
-    else:
+    form = PointForm()  
+    if point_id is not None:
         point = Point.query.get(point_id)
-        form.new.data = False    
-        form.lat.data = point.location.lat
-        form.lon.data = point.location.lon    
+        
+    if request.method == 'GET':
+        if point is None:
+            form.new.data = True
+        else:  
+            form.new.data = False    
+            form.id.data = point.id
+            form.lat.data = point.location.lat
+            form.lon.data = point.location.lon    
     if request.method == 'POST' and form.validate():  # @UndefinedVariable
         if point is None:
             #new point has passed validation, add to db

@@ -7,7 +7,7 @@
   {% if form.new.data %} 
   	<form class='new-point' method=post action="{{ url_for('addEditPoint') }}">
   {% else %}
-  	<form class='edit-point' method=post action="{{ url_for('addEditPoint', run_id=form.id.data) }}">
+  	<form class='edit-point' method=post action="{{ url_for('addEditPoint', point_id=form.id.data) }}">
   {% endif %}
     {{ form.hidden_tag() }}
     <dl>     
