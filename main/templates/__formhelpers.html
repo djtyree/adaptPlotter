@@ -33,3 +33,15 @@
         <button type="button">Add entry</button>
     </div>
 {% endmacro %}
+
+{% macro render_path_point(index, point) %}
+	<tr class="row">
+    	<input id="points-{{ index }}-id" name="points-{{ index }}-id" type="hidden" value="{{ point.pid.data }}">
+		<td width="10%"><span class="move">Move</span></td>
+		<td width="10%">Latitude</td>
+   		<td width="35%"><input type="text" id="points-{{ index }}-lat" name="points-{{ index }}-lat" value="{{ point.lat.data }}"/></td>
+   		<td width="10%">Longitude</td>
+   		<td width="35%"><input type="text" id="points-{{ index }}-lon" name="points-{{ index }}-lon" value="{{ point.lon.data }}"/></td>
+		<td width="10%"><span class="remove">Remove</span></td>
+	</tr>
+{% endmacro %}

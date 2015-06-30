@@ -1,5 +1,7 @@
 from main import db
 
+from sqlalchemy.ext.orderinglist import ordering_list
+
 # Location Class
 class Location(db.Model):
     # table name
@@ -95,8 +97,8 @@ class Path(Object):
     nid = db.Column(db.Integer(), db.ForeignKey('node.id'))
     
     # relationships    
-    points = db.relationship('PathPoint', backref='path')
-    
+    points = db.relationship('PathPoint', order_by="PathPoint.position", collection_class=ordering_list('position'), backref='path')
+   
     # inheritance
     __mapper_args__ = {
         'polymorphic_identity':'path',
@@ -116,6 +118,9 @@ class PathPoint(db.Model):
     path_id = db.Column(db.Integer(), db.ForeignKey('path.id'))
     position = db.Column(db.Integer())
     loc_id = db.Column(db.Integer(), db.ForeignKey('location.id'))    
+    
+    # relationships
+    location = db.relationship("Location",backref=db.backref("pathpoint", uselist=False))
     
     # class functions
     def __repr__(self):

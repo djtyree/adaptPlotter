@@ -1,8 +1,14 @@
 from flask.ext.wtf import Form
 from wtforms import validators
 from wtforms.fields import TextField, HiddenField, FloatField, SelectField, FieldList, FormField
+import wtforms
 
-class LocationForm(Form):
+class LocationForm(wtforms.Form):
+    lat = FloatField('Latitude', [validators.Required()])
+    lon = FloatField('Longitude', [validators.Required()])
+
+class PathPointForm(wtforms.Form):
+    pid = HiddenField('Id')
     lat = FloatField('Latitude', [validators.Required()])
     lon = FloatField('Longitude', [validators.Required()])
     
@@ -36,4 +42,4 @@ class PathForm(Form):
     id = HiddenField('Id')
     new = HiddenField('New')
     node  = SelectField('Node', choices=[], coerce=int)
-    points = FieldList(FormField(LocationForm))
+    points = FieldList(FormField(PathPointForm))

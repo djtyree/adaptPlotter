@@ -1,8 +1,9 @@
 from flask import render_template, jsonify, request, flash, redirect, url_for, json
 from main import app, db
-from models import Object, Node, Location, Point, Path
+from models import Object, Node, Location, Point, Path, PathPoint
 from forms import NodeForm, PointForm, PathForm
 import random
+
 
 @app.route('/')
 def homePage():
@@ -26,7 +27,7 @@ def getAllData():
     leaders = Node.query.filter_by(leader_id=0).all()
     
     nodes = { 'name': 'Node', 'color': '#AAAAAA', 'data': [], 'marker': {'symbol': 'triangle', 'radius': 6} } 
-    paths = { 'name': 'Paths', 'color': '#FF0000', 'data': [], 'marker': {'symbol': 'square', 'radius': 4} }
+    paths = { 'lineWidth': 1,'name': 'Paths', 'color': '#FF0000', 'data': [], 'marker': {'symbol': 'square', 'radius': 4} }
     points = { 'name': 'Points', 'color': '#00FF00', 'data': [], 'marker': {'symbol': 'circle', 'radius': 3} }
     
     for leader in leaders:
@@ -35,7 +36,11 @@ def getAllData():
             nodes['data'].append(ChartPoint(x=follower.location.lat,y=follower.location.lon, name=follower.name,nid=follower.id,lid=leader.id).__dict__)
     for obj in objects:
         if obj.type == 'path':
-            paths['data'].append(None)
+            
+            paths['data'].append(ChartPoint(x=obj.node.location.lat,y=obj.node.location.lon, name='', path=obj.id).__dict__)
+            for point in obj.points:
+                paths['data'].append(ChartPoint(x=point.location.lat,y=point.location.lon, name='PathPoint - ' + str(obj.id),pid=point.id, path=obj.id).__dict__)    
+            
         elif obj.type == 'point':    
             points['data'].append(ChartPoint(x=obj.location.lat,y=obj.location.lon,name='Point - ' + str(obj.id)).__dict__)
     data = [nodes, paths, points]
@@ -139,7 +144,6 @@ def addEditPath(path_id):
     for x in Node.query.filter_by(leader_id=0):   # @UndefinedVariable
         node_choices.append((x.id,x.name))
     form = PathForm()
-    form.points.append_entry()
     form.node.choices = node_choices
     form.node.default = 0   
     if path_id is not None:
@@ -151,10 +155,31 @@ def addEditPath(path_id):
         else:  
             form.new.data = False    
             form.id.data = path.id
-            form.node.data = path.nid    
+            form.node.data = path.nid  
+            points = []
+            for point in path.points:
+                form.points.append_entry({"pid": point.id, "lat": point.location.lat, "lon":point.location.lon })  
+            #form.points.add_entry()
     if request.method == 'POST' and form.validate():  # @UndefinedVariable
         if path is None:
             # path has been created.
+            path = Path()
+            path.nid = form.node.data
+            db.session.add(path)
+            db.session.commit()            
+            for pos, point in enumerate(form.points.data):
+                newPoint = PathPoint()
+                newPoint.path_id = path.id
+                
+                location = Location(lat=point['lat'], lon=point['lon'])
+                db.session.add(location)  # @UndefinedVariable
+                
+                newPoint.location = location
+                newPoint.position = pos
+                
+                db.session.add(newPoint)
+            db.session.commit()
+            
             #db.session.add(path)  # @UndefinedVariable
             #db.session.commit()  # @UndefinedVariable
             flash("Path has beeen created")
@@ -165,6 +190,8 @@ def addEditPath(path_id):
         
         # after creating the new state, redirect them back to dce config page
         return redirect(url_for("pathPage"))    
+    elif request.method == 'POST' and not form.validate():
+        flash_errors(form)
     return render_template("pathForm.html", form=form)
 
 # Node View page
@@ -192,6 +219,8 @@ def pathPage():
 class ChartPoint(object):
     nid = 0
     lid = 0
+    path = 0
+    pid = 0
     x = 0
     y = 0
     color = ""
@@ -199,13 +228,17 @@ class ChartPoint(object):
     marker = ""
     size=6
      
-    def __init__(self, x, y, color=None, name=None, symbol=None, nid=None, lid=None, size=None):
+    def __init__(self, x, y, color=None, name=None, symbol=None, nid=None, lid=None, path=None, pid=None, size=None):
         self.x = x
         self.y = y
         if nid is not None:
             self.nid = nid
         if lid is not None:
             self.lid = lid
+        if pid is not None:
+            self.pid = pid
+        if path is not None:
+            self.path = path
         if color is not None:
             self.color = color
         if name is not None:
@@ -216,3 +249,24 @@ class ChartPoint(object):
                 self.marker['symbol'] = symbol
             if size is not None:
                 self.marker['radius'] = size
+
+def flash_errors(form):
+    for field, errors in form.errors.items():
+        for error in errors:
+            flash(u"Error in the %s field - %s" % (
+                getattr(form, field).label.text,
+                error
+            ))
+
+def multikeysort(items, columns):
+    from operator import itemgetter
+    comparers = [((itemgetter(col[1:].strip()), -1) if col.startswith('-') else
+                  (itemgetter(col.strip()), 1)) for col in columns]
+    def comparer(left, right):
+        for fn, mult in comparers:
+            result = cmp(fn(left), fn(right))
+            if result:
+                return mult * result
+        else:
+            return 0
+    return sorted(items, cmp=comparer)

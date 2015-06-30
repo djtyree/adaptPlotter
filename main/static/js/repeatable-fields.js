@@ -108,6 +108,15 @@
 			});
 
 			$(container).attr('data-rf-row-count', row_count);
+			
+			/*
+			var token = $('#csrf_token').val();
+			$('.csrf-tokens').each(function() {
+				$.each(this.attributes, function(index, element) {
+					this.value = this.value.replace(/{{csrf-token-placeholder}}/, token);
+				});
+			});
+			*/
 		}
 	}
 })(jQuery);
