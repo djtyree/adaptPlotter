@@ -7,9 +7,9 @@
 {% block body %}
   <h3 class=page-title>Add New Path</h3>
   {% if form.new.data %} 
-  	<form class='new-point' method=post action="{{ url_for('addEditPath') }}">
+  	<form class='new-path' method=post action="{{ url_for('addEditPath') }}">
   {% else %}
-  	<form class='edit-point' method=post action="{{ url_for('addEditPath', point_id=form.id.data) }}">
+  	<form class='edit-path' method=post action="{{ url_for('addEditPath', path_id=form.id.data) }}">
   {% endif %}
     {{ form.hidden_tag() }}
     <div class="node select leader">
@@ -26,6 +26,8 @@
         <tbody class="container">
           <tr class="template row">
           	{# <input class="csrf-tokens" id="points-{{ '{{' }}row-count-placeholder{{ '}}' }}-csrf_token" name="points-{{ '{{' }}row-count-placeholder{{ '}}' }}-csrf_token" type="hidden" value="{{ '{{' }}csrf-token-placeholder{{ '}}' }}"> #}
+          	<input id="points-{{ '{{' }}row-count-placeholder{{ '}}' }}-pid" name="points-{{ '{{' }}row-count-placeholder{{ '}}' }}-pid" type="hidden" value="0">
+          	<input id="points-{{ '{{' }}row-count-placeholder{{ '}}' }}-pos" name="points-{{ '{{' }}row-count-placeholder{{ '}}' }}-pos" type="hidden" class="position" value="{{ '{{' }}row-count-placeholder{{ '}}' }}">
             <td width="10%"><span class="move">Move</span></td>
             <td width="10%">Latitude</td>
             <td width="35%"><input type="text" id="points-{{ '{{' }}row-count-placeholder{{ '}}' }}-lat" name="points-{{ '{{' }}row-count-placeholder{{ '}}' }}-lat" /></td>

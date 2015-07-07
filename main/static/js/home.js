@@ -90,7 +90,7 @@ $(function () {
             }
         },
         title: {
-            text: 'Random Scatter'
+            text: 'Overview Map'
         },
         plotOptions: {
             scatter: {

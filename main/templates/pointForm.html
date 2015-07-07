@@ -10,7 +10,6 @@
   	<form class='edit-point' method=post action="{{ url_for('addEditPoint', point_id=form.id.data) }}">
   {% endif %}
     {{ form.hidden_tag() }}
-    {{ form.location.hidden_tag() }}
     <dl>     
       <div class="point text lat">{{ render_field(form.location.lat) }}</div>     
       <div class="point text lon">{{ render_field(form.location.lon) }}</div> 

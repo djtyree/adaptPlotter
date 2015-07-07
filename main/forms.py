@@ -9,6 +9,7 @@ class LocationForm(wtforms.Form):
 
 class PathPointForm(wtforms.Form):
     pid = HiddenField('Id')
+    pos = HiddenField('Position')
     lat = FloatField('Latitude', [validators.Required()])
     lon = FloatField('Longitude', [validators.Required()])
     

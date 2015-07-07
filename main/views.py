@@ -26,9 +26,9 @@ def getAllData():
     objects = db.session.query(Object).all()
     leaders = Node.query.filter_by(leader_id=0).all()
     
-    nodes = { 'name': 'Node', 'color': '#AAAAAA', 'data': [], 'marker': {'symbol': 'triangle', 'radius': 6} } 
-    paths = { 'lineWidth': 1,'name': 'Paths', 'color': '#FF0000', 'data': [], 'marker': {'symbol': 'square', 'radius': 4} }
-    points = { 'name': 'Points', 'color': '#00FF00', 'data': [], 'marker': {'symbol': 'circle', 'radius': 3} }
+    nodes = { 'name': 'Node', 'color': '#AAAAAA', 'data': [], 'marker': {'symbol': 'triangle', 'radius': 6}, 'zIndex': 3 } 
+    paths = { 'lineWidth': 1,'name': 'Paths', 'color': '#FF0000', 'data': [], 'marker': {'symbol': 'square', 'radius': 2}, 'zIndex': 1 }
+    points = { 'name': 'Points', 'color': '#00FF00', 'data': [], 'marker': {'symbol': 'circle', 'radius': 3}, 'zIndex': 2 }
     
     for leader in leaders:
         nodes['data'].append(ChartPoint(x=leader.location.lat,y=leader.location.lon,color='#0000FF', name=leader.name,nid=leader.id, size=8).__dict__)
@@ -37,9 +37,9 @@ def getAllData():
     for obj in objects:
         if obj.type == 'path':
             
-            paths['data'].append(ChartPoint(x=obj.node.location.lat,y=obj.node.location.lon, name='', path=obj.id).__dict__)
+            paths['data'].append(ChartPoint(x=obj.node.location.lat,y=obj.node.location.lon, name='-', path=obj.id).__dict__)
             for point in obj.points:
-                paths['data'].append(ChartPoint(x=point.location.lat,y=point.location.lon, name='PathPoint - ' + str(obj.id),pid=point.id, path=obj.id).__dict__)    
+                paths['data'].append(ChartPoint(x=point.location.lat,y=point.location.lon, name='PathPoint - ' + str(point.id),pid=point.id, path=obj.id).__dict__)    
             
         elif obj.type == 'point':    
             points['data'].append(ChartPoint(x=obj.location.lat,y=obj.location.lon,name='Point - ' + str(obj.id)).__dict__)
@@ -167,7 +167,7 @@ def addEditPath(path_id):
             path.nid = form.node.data
             db.session.add(path)
             db.session.commit()            
-            for pos, point in enumerate(form.points.data):
+            for index, point in enumerate(form.points.data):
                 newPoint = PathPoint()
                 newPoint.path_id = path.id
                 
@@ -175,17 +175,48 @@ def addEditPath(path_id):
                 db.session.add(location)  # @UndefinedVariable
                 
                 newPoint.location = location
-                newPoint.position = pos
+                newPoint.position = int(point['pos']) + 1
                 
                 db.session.add(newPoint)
             db.session.commit()
-            
-            #db.session.add(path)  # @UndefinedVariable
-            #db.session.commit()  # @UndefinedVariable
             flash("Path has beeen created")
         else: 
-            # path has been updated. save updates            
-            #db.session.commit()  # @UndefinedVariable
+            # path has been created.
+            path.nid = form.node.data 
+            
+            # create a list of all points already included on this path. will be used to determine if
+            # any points were deleted from the list.
+            deleteList = [] 
+            for point in path.points:
+                deleteList.append(point.id)
+            for index, point in enumerate(form.points.data):
+                if int(point['pid']) == 0:
+                    
+                    newPoint = PathPoint()
+                    newPoint.path_id = path.id
+                
+                    location = Location(lat=point['lat'], lon=point['lon'])
+                    db.session.add(location)  # @UndefinedVariable
+                
+                    newPoint.location = location
+                    newPoint.position = int(point['pos']) + 1
+                
+                    db.session.add(newPoint)
+                else: 
+                    # found existing point. update and remove from delete list
+                    savedPoint = PathPoint.query.get(point['pid'])
+                    savedPoint.position = int(point['pos']) + 1
+                    savedLoc = Location.query.get(savedPoint.loc_id)
+                    savedLoc.lat = point['lat']
+                    savedLoc.lon = point['lon']
+            
+                    deleteList.remove(int(point['pid']))
+                    
+            for pid in deleteList:
+                point = PathPoint.query.get(pid)
+                db.session.delete(point)
+            
+            db.session.commit()                    
             flash("Path has beeen updated")
         
         # after creating the new state, redirect them back to dce config page

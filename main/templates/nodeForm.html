@@ -11,7 +11,6 @@
   	<form class='edit-node' method=post action="{{ url_for('addEditNode', node_id=form.id.data) }}">
   {% endif %}
     {{ form.hidden_tag() }}
-    {{ form.location.hidden_tag() }}
     <dl>
       <div class="node text name">{{ render_field(form.name) }}</div>
       <div class="node select leader">

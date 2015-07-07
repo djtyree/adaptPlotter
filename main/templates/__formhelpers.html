@@ -36,7 +36,8 @@
 
 {% macro render_path_point(index, point) %}
 	<tr class="row">
-    	<input id="points-{{ index }}-id" name="points-{{ index }}-id" type="hidden" value="{{ point.pid.data }}">
+    	<input id="points-{{ index }}-pid" name="points-{{ index }}-pid" type="hidden" value="{{ point.pid.data }}">
+    	<input id="points-{{ index }}-pos" name="points-{{ index }}-pos" type="hidden" class="position" value="{{ index }}">
 		<td width="10%"><span class="move">Move</span></td>
 		<td width="10%">Latitude</td>
    		<td width="35%"><input type="text" id="points-{{ index }}-lat" name="points-{{ index }}-lat" value="{{ point.lat.data }}"/></td>
