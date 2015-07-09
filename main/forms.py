@@ -7,8 +7,8 @@ class LocationForm(wtforms.Form):
     lat = FloatField('Latitude', [validators.Required()])
     lon = FloatField('Longitude', [validators.Required()])
 
-class PathPointForm(wtforms.Form):
-    pid = HiddenField('Id')
+class JumpPointForm(wtforms.Form):
+    id = HiddenField('Id')
     pos = HiddenField('Position')
     lat = FloatField('Latitude', [validators.Required()])
     lon = FloatField('Longitude', [validators.Required()])
@@ -19,6 +19,7 @@ class NodeForm(Form):
     name = TextField('Name',[validators.Required()])
     leader  = SelectField('Leader', choices=[], coerce=int)
     location = FormField(LocationForm)
+    jumppoints = FieldList(FormField(JumpPointForm))
     
     def validate(self):
         valid = True
@@ -27,7 +28,7 @@ class NodeForm(Form):
             valid = False
         return valid
     
-class PointForm(Form):
+class ObstacleForm(Form):
     id = HiddenField('Id')
     new = HiddenField('New')
     location = FormField(LocationForm)
@@ -38,9 +39,3 @@ class PointForm(Form):
         if not rv:
             valid = False
         return valid
-    
-class PathForm(Form):
-    id = HiddenField('Id')
-    new = HiddenField('New')
-    node  = SelectField('Node', choices=[], coerce=int)
-    points = FieldList(FormField(PathPointForm))

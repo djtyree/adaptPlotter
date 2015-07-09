@@ -34,15 +34,49 @@
     </div>
 {% endmacro %}
 
-{% macro render_path_point(index, point) %}
+{% macro render_jumppoint(index, jumppoint) %}
 	<tr class="row">
-    	<input id="points-{{ index }}-pid" name="points-{{ index }}-pid" type="hidden" value="{{ point.pid.data }}">
-    	<input id="points-{{ index }}-pos" name="points-{{ index }}-pos" type="hidden" class="position" value="{{ index }}">
+    	<input id="jumppoints-{{ index }}-pid" name="jumppoints-{{ index }}-pid" type="hidden" value="{{ jumppoint.pid.data }}">
+    	<input id="jumppoints-{{ index }}-pos" name="jumppoints-{{ index }}-pos" type="hidden" class="position" value="{{ index }}">
 		<td width="10%"><span class="move">Move</span></td>
 		<td width="10%">Latitude</td>
-   		<td width="35%"><input type="text" id="points-{{ index }}-lat" name="points-{{ index }}-lat" value="{{ point.lat.data }}"/></td>
+   		<td width="35%"><input type="text" id="jumppoints-{{ index }}-lat" name="jumppoints-{{ index }}-lat" value="{{ jumppoint.lat.data }}"/></td>
    		<td width="10%">Longitude</td>
-   		<td width="35%"><input type="text" id="points-{{ index }}-lon" name="points-{{ index }}-lon" value="{{ point.lon.data }}"/></td>
+   		<td width="35%"><input type="text" id="jumppoints-{{ index }}-lon" name="jumppoints-{{ index }}-lon" value="{{ jumppoint.lon.data }}"/></td>
 		<td width="10%"><span class="remove">Remove</span></td>
 	</tr>
+{% endmacro %}
+
+{% macro render_jumppoint_fields(form) %}
+	<div class="repeat">
+      <table class="wrapper" width="100%">
+        <thead>
+          <tr>
+              <th width="10%" colspan="6"><span class="add">Add</span></th>
+          </tr>
+        </thead>
+        <tbody class="container">
+          <tr class="template row">
+          	{# <input class="csrf-tokens" id="jumppoints-{{ '{{' }}row-count-placeholder{{ '}}' }}-csrf_token" name="jumppoints-{{ '{{' }}row-count-placeholder{{ '}}' }}-csrf_token" type="hidden" value="{{ '{{' }}csrf-token-placeholder{{ '}}' }}"> #}
+          	<input id="jumppoints-{{ '{{' }}row-count-placeholder{{ '}}' }}-pid" name="jumppoints-{{ '{{' }}row-count-placeholder{{ '}}' }}-pid" type="hidden" value="0">
+          	<input id="jumppoints-{{ '{{' }}row-count-placeholder{{ '}}' }}-pos" name="jumppoints-{{ '{{' }}row-count-placeholder{{ '}}' }}-pos" type="hidden" class="position" value="{{ '{{' }}row-count-placeholder{{ '}}' }}">
+            <td width="10%"><span class="move">Move</span></td>
+            <td width="10%">Latitude</td>
+            <td width="35%"><input type="text" id="jumppoints-{{ '{{' }}row-count-placeholder{{ '}}' }}-lat" name="jumppoints-{{ '{{' }}row-count-placeholder{{ '}}' }}-lat" /></td>
+            <td width="10%">Longitude</td>
+            <td width="35%"><input type="text" id="jumppoints-{{ '{{' }}row-count-placeholder{{ '}}' }}-lon" name="jumppoints-{{ '{{' }}row-count-placeholder{{ '}}' }}-lon" /></td>
+		    <td width="10%"><span class="remove">Remove</span></td>
+          </tr>
+          {% if form.jumppoints|length != 0 %}
+            {% for jumppoint in form.jumppoints %}
+            	{{ render_jumppoint(loop.index0, jumppoint) }}       
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan=6>No jumppoints.</td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
 {% endmacro %}

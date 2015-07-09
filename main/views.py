@@ -1,7 +1,7 @@
 from flask import render_template, jsonify, request, flash, redirect, url_for, json
 from main import app, db
-from models import Object, Node, Location, Point, Path, PathPoint
-from forms import NodeForm, PointForm, PathForm
+from models import Node, Location, Obstacle, JumpPoint
+from forms import NodeForm, ObstacleForm
 import random
 
 
@@ -23,27 +23,24 @@ def getRandomData():
 @app.route('/data/all', methods=['GET'])
 def getAllData():    
     data = []
-    objects = db.session.query(Object).all()
+    obstacles = db.session.query(Obstacle).all()
     leaders = Node.query.filter_by(leader_id=0).all()
     
-    nodes = { 'name': 'Node', 'color': '#AAAAAA', 'data': [], 'marker': {'symbol': 'triangle', 'radius': 6}, 'zIndex': 3 } 
-    paths = { 'lineWidth': 1,'name': 'Paths', 'color': '#FF0000', 'data': [], 'marker': {'symbol': 'square', 'radius': 2}, 'zIndex': 1 }
-    points = { 'name': 'Points', 'color': '#00FF00', 'data': [], 'marker': {'symbol': 'circle', 'radius': 3}, 'zIndex': 2 }
+    map_n = { 'name': 'Node', 'color': '#AAAAAA', 'data': [], 'marker': {'symbol': 'triangle', 'radius': 6}, 'zIndex': 3 } 
+    map_jp = { 'lineWidth': 1,'name': 'Jump Points', 'color': '#FF0000', 'data': [], 'marker': {'symbol': 'square', 'radius': 2}, 'zIndex': 1 }
+    map_o = { 'name': 'Obstacles', 'color': '#00FF00', 'data': [], 'marker': {'symbol': 'circle', 'radius': 3}, 'zIndex': 2 }
     
     for leader in leaders:
-        nodes['data'].append(ChartPoint(x=leader.location.lat,y=leader.location.lon,color='#0000FF', name=leader.name,nid=leader.id, size=8).__dict__)
+        map_n['data'].append(ChartPoint(x=leader.location.lat,y=leader.location.lon,color='#0000FF', name=leader.name,nid=leader.id, size=8).__dict__)
+        map_jp['data'].append(ChartPoint(x=leader.location.lat,y=leader.location.lon, name='-', path=leader.id).__dict__)
+        for jp in leaders.jumppoints:
+            map_jp['data'].append(ChartPoint(x=jp.location.lat,y=jp.location.lon, name='Jump Point - ' + str(jp.id),pid=jp.id, node=leader.id).__dict__)
         for follower in leader.followers:
-            nodes['data'].append(ChartPoint(x=follower.location.lat,y=follower.location.lon, name=follower.name,nid=follower.id,lid=leader.id).__dict__)
-    for obj in objects:
-        if obj.type == 'path':
-            
-            paths['data'].append(ChartPoint(x=obj.node.location.lat,y=obj.node.location.lon, name='-', path=obj.id).__dict__)
-            for point in obj.points:
-                paths['data'].append(ChartPoint(x=point.location.lat,y=point.location.lon, name='PathPoint - ' + str(point.id),pid=point.id, path=obj.id).__dict__)    
-            
-        elif obj.type == 'point':    
-            points['data'].append(ChartPoint(x=obj.location.lat,y=obj.location.lon,name='Point - ' + str(obj.id)).__dict__)
-    data = [nodes, paths, points]
+            map_n['data'].append(ChartPoint(x=follower.location.lat,y=follower.location.lon, name=follower.name,nid=follower.id,lid=leader.id).__dict__)
+    for obj in obstacles:
+        map_o['data'].append(ChartPoint(x=obj.location.lat,y=obj.location.lon,name='Point - ' + str(obj.id)).__dict__)
+
+    data = [map_n, map_jp, map_o]
     return jsonify({'status':'OK','data':data})
 
 # Node Add/Edit Page
@@ -95,44 +92,45 @@ def addEditNode(node_id):
         return redirect(url_for("nodePage"))    
     return render_template("nodeForm.html", form=form)
 
-# Point Add/Edit Page
-@app.route('/point/add', defaults={'point_id': None}, methods=['GET', 'POST'])
-@app.route('/point/<int:point_id>/edit', methods=['GET', 'POST'])
-def addEditPoint(point_id):
-    point = None
-    form = PointForm()  
-    if point_id is not None:
-        point = Point.query.get(point_id)
+# Obstacle Add/Edit Page
+@app.route('/obstacles/add', defaults={'oid': None}, methods=['GET', 'POST'])
+@app.route('/obstacles/<int:oid>/edit', methods=['GET', 'POST'])
+def addEditObstacle(oid):
+    obstacle = None
+    form = ObstacleForm()  
+    if oid is not None:
+        obstacle = Obstacle.query.get(oid)
         
     if request.method == 'GET':
-        if point is None:
+        if obstacle is None:
             form.new.data = True
         else:  
             form.new.data = False    
-            form.id.data = point.id
-            form.location.lat.data = point.location.lat
-            form.location.lon.data = point.location.lon    
+            form.id.data = obstacle.id
+            form.location.lat.data = obstacle.location.lat
+            form.location.lon.data = obstacle.location.lon    
     if request.method == 'POST' and form.validate():  # @UndefinedVariable
-        if point is None:
-            #new point has passed validation, add to db
+        if obstacle is None:
+            #new obstacle has passed validation, add to db
             location = Location(lat=form.location.lat.data, lon=form.location.lon.data)
             db.session.add(location)  # @UndefinedVariable
-            point= Point(location=location)
-            db.session.add(point)  # @UndefinedVariable
+            obstacle= Obstacle(location=location)
+            db.session.add(obstacle)  # @UndefinedVariable
             db.session.commit()  # @UndefinedVariable
-            flash("Point has beeen created")
+            flash("Obstacle has been created")
         else: 
             #node has been updated. save updates
-            location = Location.query.get(point.loc_id)
+            location = Location.query.get(obstacle.loc_id)
             location.lat = form.location.lat.data
             location.lon = form.location.lon.data
             db.session.commit()  # @UndefinedVariable
-            flash("Point has beeen updated")
+            flash("Obstacle has been updated")
         
         # after creating the new state, redirect them back to dce config page
-        return redirect(url_for("pointPage"))    
-    return render_template("pointForm.html", form=form)
+        return redirect(url_for("obstaclePage"))    
+    return render_template("obstacleForm.html", form=form)
 
+'''
 # Path Add/Edit Page
 @app.route('/path/add', defaults={'path_id': None}, methods=['GET', 'POST'])
 @app.route('/path/<int:path_id>/edit', methods=['GET', 'POST'])
@@ -224,6 +222,7 @@ def addEditPath(path_id):
     elif request.method == 'POST' and not form.validate():
         flash_errors(form)
     return render_template("pathForm.html", form=form)
+'''
 
 # Node View page
 @app.route('/node')
@@ -231,17 +230,11 @@ def nodePage():
     nodes = Node.query.all()    # @UndefinedVariable   
     return render_template('nodes.html', nodes=nodes)
 
-# Point View page
-@app.route('/point')
-def pointPage():    
-    points = Point.query.all()    # @UndefinedVariable   
-    return render_template('points.html', points=points)
-
-# Point View page
-@app.route('/path')
-def pathPage():    
-    paths = Path.query.all()    # @UndefinedVariable   
-    return render_template('paths.html', paths=paths)
+# Obstacle View page
+@app.route('/obstacles')
+def obstaclePage():    
+    obstacles = Obstacle.query.all()    # @UndefinedVariable   
+    return render_template('obstacles.html', obstacles=obstacles)
 
 #####################################################################
 ###                      Helper Functions                         ###
