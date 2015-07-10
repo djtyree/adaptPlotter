@@ -1,5 +1,5 @@
 function updatePositions(event, ui) {
-	var $lis = $(this).children('tr:not(.template)');
+	var $lis = $(this).children('tr.row:not(.template)');
     $lis.each(function() {
         var $li = $(this);
         var newVal = $(this).index() - 1;
@@ -8,7 +8,7 @@ function updatePositions(event, ui) {
 }
 
 function updateAfterRemove() {
-	var $lis = $('.repeat table tbody').children('tr:not(.template)');
+	var $lis = $('.repeat table tbody .row').children('tr:not(.template)');
     $lis.each(function() {
         var $li = $(this);
         var newVal = $(this).index() - 1;

@@ -8,7 +8,7 @@ class LocationForm(wtforms.Form):
     lon = FloatField('Longitude', [validators.Required()])
 
 class JumpPointForm(wtforms.Form):
-    id = HiddenField('Id')
+    jp_id = HiddenField('JumpPoint Id')
     pos = HiddenField('Position')
     lat = FloatField('Latitude', [validators.Required()])
     lon = FloatField('Longitude', [validators.Required()])

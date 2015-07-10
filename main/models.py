@@ -1,7 +1,8 @@
 from main import db
 
 from sqlalchemy.ext.orderinglist import ordering_list
-
+from sqlalchemy_utils import auto_delete_orphans
+from sqlalchemy.orm.strategies import single_parent_validator
 
 node_jump_association_table = db.Table('node_jp_association',
     db.Column('node_id', db.Integer, db.ForeignKey('node.id')),
@@ -34,7 +35,7 @@ class Node(db.Model):
     loc_id = db.Column(db.Integer, db.ForeignKey('location.id'))
     
     # relationships
-    location = db.relationship("Location",backref=db.backref("node", uselist=False))
+    location = db.relationship("Location",backref=db.backref("node", uselist=False), cascade="all, delete-orphan", single_parent=True)
     followers = db.relationship("Node",backref=db.backref("leader", remote_side='Node.id'), foreign_keys='Node.leader_id')
     jumppoints = db.relationship('JumpPoint', order_by="JumpPoint.position", collection_class=ordering_list('position'), secondary=node_jump_association_table, backref='nodes')
     
@@ -49,7 +50,7 @@ class Node(db.Model):
     
     def __repr__(self):
         return '<Object %s>' % (self.name)
-       
+     
 # Point Class
 class JumpPoint(db.Model):
     # table name
@@ -61,7 +62,7 @@ class JumpPoint(db.Model):
     loc_id = db.Column(db.Integer(), db.ForeignKey('location.id'))    
     
     # relationships
-    location = db.relationship("Location",backref=db.backref("jumppoint", uselist=False))
+    location = db.relationship("Location",backref=db.backref("jumppoint", uselist=False), cascade="all, delete-orphan", single_parent=True)
     
     # class functions
     def __repr__(self):
@@ -78,11 +79,12 @@ class Obstacle(db.Model):
     loc_id = db.Column(db.Integer(), db.ForeignKey('location.id'))
     
     # relationships
-    location = db.relationship("Location",backref=db.backref("obstacle", uselist=False))
+    location = db.relationship("Location",backref=db.backref("obstacle", uselist=False), cascade="all, delete-orphan", single_parent=True)
     
     # inheritance
     
     # class functions
     def __repr__(self):
         return '<Obstacle %d>' % (self.id)
-    
+
+auto_delete_orphans(Node.jumppoints)    

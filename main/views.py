@@ -32,9 +32,9 @@ def getAllData():
     
     for leader in leaders:
         map_n['data'].append(ChartPoint(x=leader.location.lat,y=leader.location.lon,color='#0000FF', name=leader.name,nid=leader.id, size=8).__dict__)
-        map_jp['data'].append(ChartPoint(x=leader.location.lat,y=leader.location.lon, name='-', path=leader.id).__dict__)
-        for jp in leaders.jumppoints:
-            map_jp['data'].append(ChartPoint(x=jp.location.lat,y=jp.location.lon, name='Jump Point - ' + str(jp.id),pid=jp.id, node=leader.id).__dict__)
+        map_jp['data'].append(ChartPoint(x=leader.location.lat,y=leader.location.lon, name='-', node=leader.id).__dict__)
+        for jp in leader.jumppoints:
+            map_jp['data'].append(ChartPoint(x=jp.location.lat,y=jp.location.lon, name='Jump Point - ' + str(jp.id),id=jp.id, node=leader.id).__dict__)
         for follower in leader.followers:
             map_n['data'].append(ChartPoint(x=follower.location.lat,y=follower.location.lon, name=follower.name,nid=follower.id,lid=leader.id).__dict__)
     for obj in obstacles:
@@ -68,6 +68,10 @@ def addEditNode(node_id):
             form.location.lat.data = node.location.lat
             form.location.lon.data = node.location.lon
             form.leader.data = node.leader_id    
+ 
+            jumppoints = []
+            for jp in node.jumppoints:
+                form.jumppoints.append_entry({"jp_id": jp.id, "lat": jp.location.lat, "lon":jp.location.lon })  
     elif request.method == 'POST' and form.validate():  # @UndefinedVariable
         if node is None:
             #new node has passed validation, add to db
@@ -76,7 +80,21 @@ def addEditNode(node_id):
             node = Node(name=form.name.data, leader_id=form.leader.data, location=location)
             db.session.add(node)  # @UndefinedVariable
             db.session.commit()  # @UndefinedVariable
-            flash("Node has beeen created")
+            
+            for index, point in enumerate(form.jumppoints.data):
+                jp = JumpPoint()
+                
+                location = Location(lat=point['lat'], lon=point['lon'])
+                db.session.add(location)  # @UndefinedVariable
+                
+                jp.location = location
+                jp.position = int(point['pos']) + 1
+                
+                db.session.add(jp)
+                node.jumppoints.append(jp)
+            
+            db.session.commit()  # @UndefinedVariable
+            flash("Node has been created")
         else: 
             #node has been updated. save updates
             node.name = form.name.data
@@ -85,8 +103,41 @@ def addEditNode(node_id):
             location.lon = form.location.lon.data
             node.location = location
             node.leader_id = form.leader.data
-            db.session.commit()  # @UndefinedVariable
-            flash("Node has beeen updated")
+
+            # create a list of all points already included on this path. will be used to determine if
+            # any points were deleted from the list.
+            deleteList = [] 
+            for jp in node.jumppoints:
+                deleteList.append(jp.id)
+            for index, jp in enumerate(form.jumppoints.data):
+                if int(jp['jp_id']) == 0:
+                    
+                    newjp = JumpPoint()
+                
+                    location = Location(lat=jp['lat'], lon=jp['lon'])
+                    db.session.add(location)  # @UndefinedVariable
+                
+                    newjp.location = location
+                    newjp.position = int(jp['pos']) + 1                    
+                    db.session.add(newjp)
+                    node.jumppoints.append(newjp)
+                else: 
+                    # found existing point. update and remove from delete list
+                    savedjp = JumpPoint.query.get(jp['jp_id'])
+                    savedjp.position = int(jp['pos']) + 1
+                    savedLoc = Location.query.get(savedjp.loc_id)
+                    savedLoc.lat = jp['lat']
+                    savedLoc.lon = jp['lon']
+            
+                    deleteList.remove(int(jp['jp_id']))
+                    
+            for id in deleteList:
+                jp= JumpPoint.query.get(id)
+                db.session.delete(jp)
+            
+            db.session.commit()                    
+            flash("Node has been updated")
+        
             
         # after creating the new state, redirect them back to dce config page
         return redirect(url_for("nodePage"))    
@@ -130,100 +181,6 @@ def addEditObstacle(oid):
         return redirect(url_for("obstaclePage"))    
     return render_template("obstacleForm.html", form=form)
 
-'''
-# Path Add/Edit Page
-@app.route('/path/add', defaults={'path_id': None}, methods=['GET', 'POST'])
-@app.route('/path/<int:path_id>/edit', methods=['GET', 'POST'])
-def addEditPath(path_id):
-    path = None
-      
-    # get choices for node leaders
-    node_choices = [(0, 'Self')]
-    for x in Node.query.filter_by(leader_id=0):   # @UndefinedVariable
-        node_choices.append((x.id,x.name))
-    form = PathForm()
-    form.node.choices = node_choices
-    form.node.default = 0   
-    if path_id is not None:
-        path = Path.query.get(path_id)
-        
-    if request.method == 'GET':
-        if path is None:
-            form.new.data = True
-        else:  
-            form.new.data = False    
-            form.id.data = path.id
-            form.node.data = path.nid  
-            points = []
-            for point in path.points:
-                form.points.append_entry({"pid": point.id, "lat": point.location.lat, "lon":point.location.lon })  
-            #form.points.add_entry()
-    if request.method == 'POST' and form.validate():  # @UndefinedVariable
-        if path is None:
-            # path has been created.
-            path = Path()
-            path.nid = form.node.data
-            db.session.add(path)
-            db.session.commit()            
-            for index, point in enumerate(form.points.data):
-                newPoint = PathPoint()
-                newPoint.path_id = path.id
-                
-                location = Location(lat=point['lat'], lon=point['lon'])
-                db.session.add(location)  # @UndefinedVariable
-                
-                newPoint.location = location
-                newPoint.position = int(point['pos']) + 1
-                
-                db.session.add(newPoint)
-            db.session.commit()
-            flash("Path has beeen created")
-        else: 
-            # path has been created.
-            path.nid = form.node.data 
-            
-            # create a list of all points already included on this path. will be used to determine if
-            # any points were deleted from the list.
-            deleteList = [] 
-            for point in path.points:
-                deleteList.append(point.id)
-            for index, point in enumerate(form.points.data):
-                if int(point['pid']) == 0:
-                    
-                    newPoint = PathPoint()
-                    newPoint.path_id = path.id
-                
-                    location = Location(lat=point['lat'], lon=point['lon'])
-                    db.session.add(location)  # @UndefinedVariable
-                
-                    newPoint.location = location
-                    newPoint.position = int(point['pos']) + 1
-                
-                    db.session.add(newPoint)
-                else: 
-                    # found existing point. update and remove from delete list
-                    savedPoint = PathPoint.query.get(point['pid'])
-                    savedPoint.position = int(point['pos']) + 1
-                    savedLoc = Location.query.get(savedPoint.loc_id)
-                    savedLoc.lat = point['lat']
-                    savedLoc.lon = point['lon']
-            
-                    deleteList.remove(int(point['pid']))
-                    
-            for pid in deleteList:
-                point = PathPoint.query.get(pid)
-                db.session.delete(point)
-            
-            db.session.commit()                    
-            flash("Path has beeen updated")
-        
-        # after creating the new state, redirect them back to dce config page
-        return redirect(url_for("pathPage"))    
-    elif request.method == 'POST' and not form.validate():
-        flash_errors(form)
-    return render_template("pathForm.html", form=form)
-'''
-
 # Node View page
 @app.route('/node')
 def nodePage():    
@@ -236,6 +193,28 @@ def obstaclePage():
     obstacles = Obstacle.query.all()    # @UndefinedVariable   
     return render_template('obstacles.html', obstacles=obstacles)
 
+# Delete Data
+@app.route('/data/delete', methods=['POST'])
+def deleteData():    
+    id = str(request.json['data_id'])
+    type = str(request.json['data_type'])
+    
+    msg = 'No message'
+    if type =='node':
+        node = Node.query.filter_by(id=id).first()  # @UndefinedVariable
+        for follower in node.followers:
+            follower.leader_id = 0
+        db.session.delete(node) 
+    elif type =='obstacle':
+        obstacle = Obstacle.query.filter_by(id=id).first()  # @UndefinedVariable
+        db.session.delete(obstacle)
+        msg = "Obstacle has been deleted."
+    else:
+        return jsonify({'status': "ERROR", 'msg':'Data type was not present or unrecognized '})
+    db.session.commit()  # @UndefinedVariable
+    return jsonify({'status':'OK','msg': msg})
+    
+
 #####################################################################
 ###                      Helper Functions                         ###
 #####################################################################
@@ -243,8 +222,8 @@ def obstaclePage():
 class ChartPoint(object):
     nid = 0
     lid = 0
-    path = 0
-    pid = 0
+    node = 0
+    id = 0
     x = 0
     y = 0
     color = ""
@@ -252,17 +231,17 @@ class ChartPoint(object):
     marker = ""
     size=6
      
-    def __init__(self, x, y, color=None, name=None, symbol=None, nid=None, lid=None, path=None, pid=None, size=None):
+    def __init__(self, x, y, color=None, name=None, symbol=None, nid=None, lid=None, node=None, id=None, size=None):
         self.x = x
         self.y = y
         if nid is not None:
             self.nid = nid
         if lid is not None:
             self.lid = lid
-        if pid is not None:
-            self.pid = pid
-        if path is not None:
-            self.path = path
+        if id is not None:
+            self.id = id
+        if node is not None:
+            self.node = node
         if color is not None:
             self.color = color
         if name is not None:

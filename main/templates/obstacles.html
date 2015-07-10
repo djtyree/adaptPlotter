@@ -3,8 +3,8 @@
 {% endblock %}
 {% block body %}
   <h3 class=page-title>Obstacle Page</h3>    
-  <div id="obstacles">
-    <table>
+  <div>
+    <table id='obstacle' class='data-table'>
       <thead>
         <tr>
           <th class=obstacle-id>ID</th>   
@@ -21,8 +21,8 @@
               <td class=obstacle-id>{{ obstacle.id }}</td>
               <td class=obstacle-lat>{{ obstacle.location.lat }}</td>
               <td class=obstacle-lon>{{ obstacle.location.lon }}</td>           	                                   
-              <td><button id="obstacle-edit-{{ obstacle.id }}" class="obstacle-edit btn-small"><a href="{{ url_for('addEditObstacle', oid=obstacle.id) }}">edit</a></button></td>                   
-              <td><button id="obstacle-delete-{{ obstacle.id }}" class="obstacle-delete btn-small">delete</button></td>              
+              <td><button id="obstacle-edit-{{ obstacle.id }}" class="btn-edit btn-small"><a href="{{ url_for('addEditObstacle', oid=obstacle.id) }}">edit</a></button></td>                   
+              <td><button id="obstacle-delete-{{ obstacle.id }}" class="btn-delete btn-small">delete</button></td>              
             </tr>	          
           {% else %}
             <tr>

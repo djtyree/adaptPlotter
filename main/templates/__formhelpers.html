@@ -36,7 +36,7 @@
 
 {% macro render_jumppoint(index, jumppoint) %}
 	<tr class="row">
-    	<input id="jumppoints-{{ index }}-pid" name="jumppoints-{{ index }}-pid" type="hidden" value="{{ jumppoint.pid.data }}">
+    	<input id="jumppoints-{{ index }}-jp_id" name="jumppoints-{{ index }}-jp_id" type="hidden" value="{{ jumppoint.jp_id.data }}">
     	<input id="jumppoints-{{ index }}-pos" name="jumppoints-{{ index }}-pos" type="hidden" class="position" value="{{ index }}">
 		<td width="10%"><span class="move">Move</span></td>
 		<td width="10%">Latitude</td>
@@ -58,7 +58,7 @@
         <tbody class="container">
           <tr class="template row">
           	{# <input class="csrf-tokens" id="jumppoints-{{ '{{' }}row-count-placeholder{{ '}}' }}-csrf_token" name="jumppoints-{{ '{{' }}row-count-placeholder{{ '}}' }}-csrf_token" type="hidden" value="{{ '{{' }}csrf-token-placeholder{{ '}}' }}"> #}
-          	<input id="jumppoints-{{ '{{' }}row-count-placeholder{{ '}}' }}-pid" name="jumppoints-{{ '{{' }}row-count-placeholder{{ '}}' }}-pid" type="hidden" value="0">
+          	<input id="jumppoints-{{ '{{' }}row-count-placeholder{{ '}}' }}-jp_id" name="jumppoints-{{ '{{' }}row-count-placeholder{{ '}}' }}-jp_id" type="hidden" value="0">
           	<input id="jumppoints-{{ '{{' }}row-count-placeholder{{ '}}' }}-pos" name="jumppoints-{{ '{{' }}row-count-placeholder{{ '}}' }}-pos" type="hidden" class="position" value="{{ '{{' }}row-count-placeholder{{ '}}' }}">
             <td width="10%"><span class="move">Move</span></td>
             <td width="10%">Latitude</td>

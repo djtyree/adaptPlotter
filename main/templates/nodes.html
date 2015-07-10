@@ -3,8 +3,8 @@
 {% endblock %}
 {% block body %}
   <h3 class=page-title>Node Page</h3>    
-  <div id="nodes">
-    <table>
+  <div>
+    <table id='node' class='data-table'>
       <thead>
         <tr>
           <th class=node-id>ID</th>   
@@ -25,8 +25,8 @@
               {% else %}
               	<td class=node-leader>{{ node.leader.name }}</td>
               {% endif %}	                                   
-              <td><button id="node-edit-{{ node.id }}" class="node-edit btn-small"><a href="{{ url_for('addEditNode', node_id=node.id) }}">edit</a></button></td>                   
-              <td><button id="node-delete-{{ node.id }}" class="node-delete btn-small">delete</button></td>              
+              <td><button id="node-edit-{{ node.id }}" class="btn-edit btn-small"><a href="{{ url_for('addEditNode', node_id=node.id) }}">edit</a></button></td>                   
+              <td><button id="node-delete-{{ node.id }}" class="btn-delete btn-small">delete</button></td>              
             </tr>	          
           {% else %}
             <tr>
