@@ -48,6 +48,40 @@ utils.drawNodeLinks = function() {
     });	
 }
 
+utils.addGoal= function(e) {
+    var x = e.xAxis[0].value;
+    var y = e.yAxis[0].value;
+    var series = this.series[1];
+    
+	var my_data = []
+	mydata = {
+        'lat':  x,
+       	'lon': y,
+       	'leader': 0
+    }
+	$.ajax({
+	  url: '/data/addGoal',
+	  data: JSON.stringify(mydata, null, '\t'),
+	  type: 'POST',
+	  contentType: 'application/json;charset=UTF-8',
+	  success: function(response) {
+		console.log(response);
+        if(response.status == 'OK') {  
+    		// Add it
+    		series.addPoint([x, y]);
+        } else {
+        	// didn't receive correct status code from server
+        	// error occured
+        	alert(response.msg);
+        }
+	    return false;
+	  },
+	  error: function(error) {
+	    console.log(error);
+	  }
+	});
+}
+    
 /**
  * Request data from the server, add it to the graph and set a timeout 
  * to request again
@@ -87,6 +121,7 @@ $(function () {
             events: {
             	load: requestData,
                 redraw: utils.drawNodeLinks,
+				click: utils.addGoal,
             }
         },
         title: {

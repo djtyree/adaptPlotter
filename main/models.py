@@ -50,6 +50,19 @@ class Node(db.Model):
     
     def __repr__(self):
         return '<Object %s>' % (self.name)
+    
+    def getJumpPoints(self):
+        jps = {}
+        for jp in self.jumppoints:            
+            jps[jp.id] = jp.getJSON()
+        return jps
+    
+    def getGoals(self):
+        jps = {}
+        for jp in self.jumppoints:
+            if jp.isGoal():            
+                jps[jp.id] = jp.getJSON()
+        return jps
      
 # Point Class
 class JumpPoint(db.Model):
@@ -59,14 +72,25 @@ class JumpPoint(db.Model):
     # columns
     id = db.Column(db.Integer(), primary_key=True)
     position = db.Column(db.Integer())
+    goal = db.Column(db.Boolean())
     loc_id = db.Column(db.Integer(), db.ForeignKey('location.id'))    
     
     # relationships
     location = db.relationship("Location",backref=db.backref("jumppoint", uselist=False), cascade="all, delete-orphan", single_parent=True)
     
     # class functions
+    def isGoal(self):
+        return self.goal
+        
     def __repr__(self):
         return '<Point %d>' % (self.id)
+    
+    def getJSON(self):
+        json = { "position": self.position,
+                 "lat": self.location.lat,
+                 "lon": self.location.lon
+                }
+        return json
     
     
 # Obstacle Class

@@ -28,7 +28,9 @@ def jsonNode(node):
             'latitude': node.location.lat,
             'longitude': node.location.lon,
             'is_leader': leader,
-            'leader_id': leader_id
+            'leader_id': leader_id,
+            'jumppoints': node.getJumpPoints(),
+            'goals': node.getGoals()
             }
 
 # RestNode

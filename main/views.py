@@ -71,7 +71,7 @@ def addEditNode(node_id):
  
             jumppoints = []
             for jp in node.jumppoints:
-                form.jumppoints.append_entry({"jp_id": jp.id, "lat": jp.location.lat, "lon":jp.location.lon })  
+                form.jumppoints.append_entry({"jp_id": jp.id, "lat": jp.location.lat, "lon":jp.location.lon, "goal": jp.goal })  
     elif request.method == 'POST' and form.validate():  # @UndefinedVariable
         if node is None:
             #new node has passed validation, add to db
@@ -89,6 +89,7 @@ def addEditNode(node_id):
                 
                 jp.location = location
                 jp.position = int(point['pos']) + 1
+                jp.goal = point['goal']
                 
                 db.session.add(jp)
                 node.jumppoints.append(jp)
@@ -118,13 +119,15 @@ def addEditNode(node_id):
                     db.session.add(location)  # @UndefinedVariable
                 
                     newjp.location = location
-                    newjp.position = int(jp['pos']) + 1                    
+                    newjp.position = int(jp['pos']) + 1        
+                    newjp.goal = jp['goal']            
                     db.session.add(newjp)
                     node.jumppoints.append(newjp)
                 else: 
                     # found existing point. update and remove from delete list
                     savedjp = JumpPoint.query.get(jp['jp_id'])
                     savedjp.position = int(jp['pos']) + 1
+                    savedjp.goal = jp['goal']
                     savedLoc = Location.query.get(savedjp.loc_id)
                     savedLoc.lat = jp['lat']
                     savedLoc.lon = jp['lon']
@@ -214,6 +217,32 @@ def deleteData():
     db.session.commit()  # @UndefinedVariable
     return jsonify({'status':'OK','msg': msg})
     
+# Delete Data
+@app.route('/data/addGoal', methods=['POST'])
+def addGoal():
+    lid = str(request.json['leader'])    
+    lat = str(request.json['lat'])
+    lon = str(request.json['lon'])
+    
+    msg = 'No message'
+    
+    if int(lid) == 0:
+        # no leader specified, grab first leader in db
+        leader = Node.query.filter_by(leader_id=0).first()
+        jp = JumpPoint()
+        location = Location(lat=lat, lon=lon)
+        db.session.add(location)  # @UndefinedVariable
+        
+        jp.location = location
+        jp.position = len(leader.jumppoints) + 1
+        jp.goal = True
+        
+        db.session.add(jp)
+        leader.jumppoints.append(jp)
+        db.session.commit()
+        return jsonify({'status':'OK','msg': "Goal Added"})    
+    
+    return jsonify({'status':'ERRROR','msg': msg})
 
 #####################################################################
 ###                      Helper Functions                         ###

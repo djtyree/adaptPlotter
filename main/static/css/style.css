@@ -194,3 +194,21 @@ svg .title,
   table tbody tr td {
     border-right: 1px solid #95b3d7;
   }
+  
+  table .remove,
+  table .move {
+  	min-width: 20px;
+  	height: 100%;
+  	padding: 1px;
+  	margin: auto;
+  	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;    
+	box-sizing: border-box;
+	display: inline-block;
+	background: url('../images/sortable.png') no-repeat;
+	background-size: 20px 20px;
+  }
+  table .remove {
+  	background: url('../images/delete.png') no-repeat;
+  	background-size: 20px 20px;
+  }

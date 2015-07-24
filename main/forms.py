@@ -1,6 +1,6 @@
 from flask.ext.wtf import Form
 from wtforms import validators
-from wtforms.fields import TextField, HiddenField, FloatField, SelectField, FieldList, FormField
+from wtforms.fields import TextField, HiddenField, FloatField, SelectField, FieldList, FormField, BooleanField
 import wtforms
 
 class LocationForm(wtforms.Form):
@@ -10,6 +10,7 @@ class LocationForm(wtforms.Form):
 class JumpPointForm(wtforms.Form):
     jp_id = HiddenField('JumpPoint Id')
     pos = HiddenField('Position')
+    goal = BooleanField('Goal', [])
     lat = FloatField('Latitude', [validators.Required()])
     lon = FloatField('Longitude', [validators.Required()])
     

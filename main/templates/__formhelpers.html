@@ -38,12 +38,15 @@
 	<tr class="row">
     	<input id="jumppoints-{{ index }}-jp_id" name="jumppoints-{{ index }}-jp_id" type="hidden" value="{{ jumppoint.jp_id.data }}">
     	<input id="jumppoints-{{ index }}-pos" name="jumppoints-{{ index }}-pos" type="hidden" class="position" value="{{ index }}">
-		<td width="10%"><span class="move">Move</span></td>
-		<td width="10%">Latitude</td>
-   		<td width="35%"><input type="text" id="jumppoints-{{ index }}-lat" name="jumppoints-{{ index }}-lat" value="{{ jumppoint.lat.data }}"/></td>
-   		<td width="10%">Longitude</td>
-   		<td width="35%"><input type="text" id="jumppoints-{{ index }}-lon" name="jumppoints-{{ index }}-lon" value="{{ jumppoint.lon.data }}"/></td>
-		<td width="10%"><span class="remove">Remove</span></td>
+		<td width="10%"><span class="move"></span></td>
+		{% if jumppoint.goal.data %}
+			<td width="10%"><input type="checkbox" id="jumppoints-{{ index }}-goal" name="jumppoints-{{ index }}-goal" value="{{ jumppoint.goal.data }}" checked/></td>
+		{% else %}
+			<td width="10%"><input type="checkbox" id="jumppoints-{{ index }}-goal" name="jumppoints-{{ index }}-goal" value="{{ jumppoint.goal.data }}"/></td>
+		{% endif %}
+   		<td width="30%"><input type="text" id="jumppoints-{{ index }}-lat" name="jumppoints-{{ index }}-lat" value="{{ jumppoint.lat.data }}"/></td>
+   		<td width="30%"><input type="text" id="jumppoints-{{ index }}-lon" name="jumppoints-{{ index }}-lon" value="{{ jumppoint.lon.data }}"/></td>
+		<td width="10%"><span class="remove"></span></td>
 	</tr>
 {% endmacro %}
 
@@ -52,7 +55,14 @@
       <table class="wrapper" width="100%">
         <thead>
           <tr>
-              <th width="10%" colspan="6"><span class="add">Add</span></th>
+              <th><span>Move</span></th>
+              <th><span>Goal</span></th>
+              <th><span>Latitude</span></th>
+              <th><span>Longitude</span></th>
+              <th><span>Remove</span></th>
+          </tr>
+          <tr>
+              <th class="new" width="10%" colspan="5"><span class="add">Add</span></th>
           </tr>
         </thead>
         <tbody class="container">
@@ -60,12 +70,11 @@
           	{# <input class="csrf-tokens" id="jumppoints-{{ '{{' }}row-count-placeholder{{ '}}' }}-csrf_token" name="jumppoints-{{ '{{' }}row-count-placeholder{{ '}}' }}-csrf_token" type="hidden" value="{{ '{{' }}csrf-token-placeholder{{ '}}' }}"> #}
           	<input id="jumppoints-{{ '{{' }}row-count-placeholder{{ '}}' }}-jp_id" name="jumppoints-{{ '{{' }}row-count-placeholder{{ '}}' }}-jp_id" type="hidden" value="0">
           	<input id="jumppoints-{{ '{{' }}row-count-placeholder{{ '}}' }}-pos" name="jumppoints-{{ '{{' }}row-count-placeholder{{ '}}' }}-pos" type="hidden" class="position" value="{{ '{{' }}row-count-placeholder{{ '}}' }}">
-            <td width="10%"><span class="move">Move</span></td>
-            <td width="10%">Latitude</td>
-            <td width="35%"><input type="text" id="jumppoints-{{ '{{' }}row-count-placeholder{{ '}}' }}-lat" name="jumppoints-{{ '{{' }}row-count-placeholder{{ '}}' }}-lat" /></td>
-            <td width="10%">Longitude</td>
-            <td width="35%"><input type="text" id="jumppoints-{{ '{{' }}row-count-placeholder{{ '}}' }}-lon" name="jumppoints-{{ '{{' }}row-count-placeholder{{ '}}' }}-lon" /></td>
-		    <td width="10%"><span class="remove">Remove</span></td>
+            <td width="10%"><span class="move"></span></td>
+            <td width="10%"><input type="checkbox" id="jumppoints-{{ '{{' }}row-count-placeholder{{ '}}' }}-goal" name="jumppoints-{{ '{{' }}row-count-placeholder{{ '}}' }}-goal" /></td>            
+            <td width="30%"><input type="text" id="jumppoints-{{ '{{' }}row-count-placeholder{{ '}}' }}-lat" name="jumppoints-{{ '{{' }}row-count-placeholder{{ '}}' }}-lat" /></td>
+            <td width="30%"><input type="text" id="jumppoints-{{ '{{' }}row-count-placeholder{{ '}}' }}-lon" name="jumppoints-{{ '{{' }}row-count-placeholder{{ '}}' }}-lon" /></td>
+		    <td width="10%"><span class="remove"></span></td>
           </tr>
           {% if form.jumppoints|length != 0 %}
             {% for jumppoint in form.jumppoints %}
