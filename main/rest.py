@@ -23,7 +23,8 @@ def jsonNode(node):
         leader = "False"
         leader_id = node.leader_id
     return {
-            'id': node.id, 
+            'nid': node.id,
+            'rid': node.rid, 
             'name': node.name,
             'latitude': node.location.lat,
             'longitude': node.location.lon,
@@ -32,6 +33,8 @@ def jsonNode(node):
             'jumppoints': node.getJumpPoints(),
             'goals': node.getGoals()
             }
+def jsonNodeGoal(node):
+    return node.getGoals() 
 
 # RestNode
 # works with a single node    
@@ -42,10 +45,25 @@ class RestNode(Resource):
         
         if nodes:
             for x in nodes:
-                if x.id == node_id:
+                if x.rid == node_id:
                     node = x                    
             if node:
                 return jsonNode(node)
+            
+            # RestNode
+            
+# works with a single node    
+class RestNodeGoals(Resource):              
+    def get(self, node_id):
+        node = None        
+        nodes = Node.query.all()    # @UndefinedVariable
+        
+        if nodes:
+            for x in nodes:
+                if x.rid == node_id:
+                    node = x                    
+            if node:
+                return jsonNodeGoal(node)
             
 # RestNodeList
 # works with all nodes    

@@ -30,6 +30,7 @@ class Node(db.Model):
     
     # columns
     id = db.Column(db.Integer(), primary_key=True)
+    rid = db.Column(db.Integer())
     name = db.Column(db.String(64))
     leader_id = db.Column(db.Integer(), db.ForeignKey('node.id'))    
     loc_id = db.Column(db.Integer, db.ForeignKey('location.id'))
@@ -58,10 +59,10 @@ class Node(db.Model):
         return jps
     
     def getGoals(self):
-        jps = {}
+        jps = []
         for jp in self.jumppoints:
             if jp.isGoal():            
-                jps[jp.id] = jp.getJSON()
+                jps.append(jp.getJSON())
         return jps
      
 # Point Class

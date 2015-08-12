@@ -65,6 +65,7 @@ def addEditNode(node_id):
             form.new.data = False
             form.id.data = node.id
             form.name.data = node.name
+            form.rid.data = node.rid
             form.location.lat.data = node.location.lat
             form.location.lon.data = node.location.lon
             form.leader.data = node.leader_id    
@@ -77,7 +78,7 @@ def addEditNode(node_id):
             #new node has passed validation, add to db
             location = Location(lat=form.location.lat.data, lon=form.location.lon.data)
             db.session.add(location)  # @UndefinedVariable
-            node = Node(name=form.name.data, leader_id=form.leader.data, location=location)
+            node = Node(name=form.name.data, leader_id=form.leader.data, location=location, rid=form.rid.data)
             db.session.add(node)  # @UndefinedVariable
             db.session.commit()  # @UndefinedVariable
             
@@ -99,6 +100,7 @@ def addEditNode(node_id):
         else: 
             #node has been updated. save updates
             node.name = form.name.data
+            node.rid = form.rid.data
             location = Location.query.get(node.loc_id)
             location.lat = form.location.lat.data
             location.lon = form.location.lon.data

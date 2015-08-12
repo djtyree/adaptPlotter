@@ -2,6 +2,7 @@ from flask.ext.wtf import Form
 from wtforms import validators
 from wtforms.fields import TextField, HiddenField, FloatField, SelectField, FieldList, FormField, BooleanField
 import wtforms
+from wtforms.fields.core import IntegerField
 
 class LocationForm(wtforms.Form):
     lat = FloatField('Latitude', [validators.Required()])
@@ -18,6 +19,7 @@ class NodeForm(Form):
     id = HiddenField('Id')
     new = HiddenField('New')
     name = TextField('Name',[validators.Required()])
+    rid = IntegerField("Robot ID",[validators.Required()])
     leader  = SelectField('Leader', choices=[], coerce=int)
     location = FormField(LocationForm)
     jumppoints = FieldList(FormField(JumpPointForm))
