@@ -24,7 +24,7 @@ def getRandomData():
 def getAllData():    
     data = []
     obstacles = db.session.query(Obstacle).all()
-    leaders = Node.query.filter_by(leader_id=0).all()
+    leaders = Node.query.filter_by(leader_id=0).all() #  @UndefinedVariable
     
     map_n = { 'name': 'Node', 'color': '#AAAAAA', 'data': [], 'marker': {'symbol': 'triangle', 'radius': 6}, 'zIndex': 3 } 
     map_jp = { 'lineWidth': 1,'name': 'Jump Points', 'color': '#FF0000', 'data': [], 'marker': {'symbol': 'square', 'radius': 2}, 'zIndex': 1 }
@@ -56,7 +56,7 @@ def addEditNode(node_id):
     form.leader.choices = leader_choices
     form.leader.default = 0    
     if node_id is not None:
-        node = Node.query.get(node_id)
+        node = Node.query.get(node_id)  # @UndefinedVariable
         
     if request.method == 'GET':
         if node is None:
@@ -101,7 +101,7 @@ def addEditNode(node_id):
             #node has been updated. save updates
             node.name = form.name.data
             node.rid = form.rid.data
-            location = Location.query.get(node.loc_id)
+            location = Location.query.get(node.loc_id)  # @UndefinedVariable
             location.lat = form.location.lat.data
             location.lon = form.location.lon.data
             node.location = location
@@ -127,17 +127,17 @@ def addEditNode(node_id):
                     node.jumppoints.append(newjp)
                 else: 
                     # found existing point. update and remove from delete list
-                    savedjp = JumpPoint.query.get(jp['jp_id'])
+                    savedjp = JumpPoint.query.get(jp['jp_id'])   # @UndefinedVariable
                     savedjp.position = int(jp['pos']) + 1
                     savedjp.goal = jp['goal']
-                    savedLoc = Location.query.get(savedjp.loc_id)
+                    savedLoc = Location.query.get(savedjp.loc_id)   # @UndefinedVariable
                     savedLoc.lat = jp['lat']
                     savedLoc.lon = jp['lon']
             
                     deleteList.remove(int(jp['jp_id']))
                     
             for id in deleteList:
-                jp= JumpPoint.query.get(id)
+                jp= JumpPoint.query.get(id)  # @UndefinedVariable
                 db.session.delete(jp)
             
             db.session.commit()                    
@@ -155,7 +155,7 @@ def addEditObstacle(oid):
     obstacle = None
     form = ObstacleForm()  
     if oid is not None:
-        obstacle = Obstacle.query.get(oid)
+        obstacle = Obstacle.query.get(oid)  # @UndefinedVariable
         
     if request.method == 'GET':
         if obstacle is None:
@@ -176,7 +176,7 @@ def addEditObstacle(oid):
             flash("Obstacle has been created")
         else: 
             #node has been updated. save updates
-            location = Location.query.get(obstacle.loc_id)
+            location = Location.query.get(obstacle.loc_id)  # @UndefinedVariable
             location.lat = form.location.lat.data
             location.lon = form.location.lon.data
             db.session.commit()  # @UndefinedVariable
@@ -230,7 +230,7 @@ def addGoal():
     
     if int(lid) == 0:
         # no leader specified, grab first leader in db
-        leader = Node.query.filter_by(leader_id=0).first()
+        leader = Node.query.filter_by(leader_id=0).first()  # @UndefinedVariable
         jp = JumpPoint()
         location = Location(lat=lat, lon=lon)
         db.session.add(location)  # @UndefinedVariable
