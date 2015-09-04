@@ -1,10 +1,13 @@
 ###################################################################
 #################             IMPORTS           ###################
 ###################################################################
-from flask import jsonify
+import unicodedata
+
+from flask import make_response, json
 from flask.ext.restful import Resource, reqparse
 
 from main import db
+from main.models import JumpPoint, Location
 from models import Node
 
 
@@ -125,9 +128,8 @@ class RestNodeLocation(Resource):
 class RestNodeJumpPoints(Resource):
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
-        self.reqparse.add_argument('lat')
-        self.reqparse.add_argument('lon')        
-        super(RestNodeLocation, self).__init__()
+        self.reqparse.add_argument('jps')       
+        super(RestNodeJumpPoints, self).__init__()
         
     def get(self, node_id):
         node = None        
@@ -138,7 +140,7 @@ class RestNodeJumpPoints(Resource):
                 if x.rid == node_id:
                     node = x                    
             if node:
-                return { 'currentLocation': {
+                return { 'jptest': {
                                              'lat': node.location.lat,
                                              'lon': node.location.lon,
                                              } 
@@ -152,19 +154,29 @@ class RestNodeJumpPoints(Resource):
                 node = x
         if node:
             args = self.reqparse.parse_args()
-            lat = args['lat']
-            lon = args['lon']
-            node.location.lat = float(lat)
-            node.location.lon = float(lon)
+            data = args['jps']
+            jp_data = json.loads(data)
+            
+            for jp in jp_data:
+                
+                new_jp = JumpPoint()
+
+                lat = float(jp['lat'])
+                lon = float(jp['lng'])
+                location = Location(lat=lat, lon=lon)
+                db.session.add(location)  # @UndefinedVariable
+                
+                new_jp.location = location
+                new_jp.position = len(node.jumppoints) + 1
+                new_jp.goal = 0
+                node.jumppoints.append(new_jp)
             db.session.commit()
             return {
                     'result': {
                                'node': node.name,
                                'nid': node.id,
-                               'id': node.rid,
-                               'lat': node.location.lat, 
-                               'lon': node.location.lon, 
-                               'msg': 'New location correctly set' 
+                               'id': node.rid, 
+                               'msg': 'Test' 
                                }
                     }
                         
