@@ -157,6 +157,11 @@ class RestNodeJumpPoints(Resource):
             data = args['jps']
             jp_data = json.loads(data)
             
+            node_jumppoints = node.jumppoints
+            
+            for node_jp in node.jumppoints:
+                db.session.delete(node_jp)
+                
             for jp in jp_data:
                 
                 new_jp = JumpPoint()
@@ -169,6 +174,13 @@ class RestNodeJumpPoints(Resource):
                 new_jp.location = location
                 new_jp.position = len(node.jumppoints) + 1
                 new_jp.goal = 0
+                # check if jumppoint should be listed as a goal
+                for node_jp in node_jumppoints:
+                    node_jp_lat = node_jp.location.lat
+                    node_jp_lon = node_jp.location.lon
+                    if node_jp.goal and lat == node_jp_lat and lon == node_jp_lon:
+                        new_jp.goal = 1
+                        
                 node.jumppoints.append(new_jp)
             db.session.commit()
             return {
