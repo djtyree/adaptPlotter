@@ -29,18 +29,21 @@ def getAllData():
     map_n = { 'name': 'Node', 'color': '#AAAAAA', 'data': [], 'marker': {'symbol': 'triangle', 'radius': 6}, 'zIndex': 3 } 
     map_jp = { 'lineWidth': 1,'name': 'Jump Points', 'color': '#FF0000', 'data': [], 'marker': {'symbol': 'square', 'radius': 2}, 'zIndex': 1 }
     map_o = { 'name': 'Obstacles', 'color': '#00FF00', 'data': [], 'marker': {'symbol': 'circle', 'radius': 3}, 'zIndex': 2 }
+    map_g = { 'name': 'Goals', 'color': '#0000FF', 'data': [], 'marker': {'symbol': 'square', 'radius': 6}, 'zIndex': 2 }
     
     for leader in leaders:
         map_n['data'].append(ChartPoint(x=leader.location.lat,y=leader.location.lon,color='#0000FF', name=leader.name,nid=leader.id, size=8).__dict__)
         map_jp['data'].append(ChartPoint(x=leader.location.lat,y=leader.location.lon, name='-', node=leader.id).__dict__)
         for jp in leader.jumppoints:
             map_jp['data'].append(ChartPoint(x=jp.location.lat,y=jp.location.lon, name='Jump Point - ' + str(jp.id),id=jp.id, node=leader.id).__dict__)
+            if(jp.goal):
+                map_g['data'].append(ChartPoint(x=jp.location.lat,y=jp.location.lon, name='Goal - ' + str(jp.id),id=jp.id, node=leader.id).__dict__)
         for follower in leader.followers:
             map_n['data'].append(ChartPoint(x=follower.location.lat,y=follower.location.lon, name=follower.name,nid=follower.id,lid=leader.id).__dict__)
     for obj in obstacles:
         map_o['data'].append(ChartPoint(x=obj.location.lat,y=obj.location.lon,name='Point - ' + str(obj.id)).__dict__)
 
-    data = [map_n, map_jp, map_o]
+    data = [map_n, map_jp, map_o, map_g]
     return jsonify({'status':'OK','data':data})
 
 # Node Add/Edit Page

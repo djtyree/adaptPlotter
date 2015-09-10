@@ -1,18 +1,16 @@
 ###################################################################
 #################             IMPORTS           ###################
 ###################################################################
-import unicodedata
-
-from flask import make_response, json
+from flask import json
 from flask.ext.restful import Resource, reqparse
 
 from main import db
-from main.models import JumpPoint, Location
-from models import Node
-
 
 # model imports
+from models import Node, JumpPoint, Location, Obstacle
+
 # function imports
+
 ###################################################################
 class RestHelloWorld(Resource):
     def get(self):
@@ -191,4 +189,53 @@ class RestNodeJumpPoints(Resource):
                                'msg': 'Test' 
                                }
                     }
-                        
+# RestObstacles
+class RestObstacles(Resource):
+    def __init__(self):
+        self.reqparse = reqparse.RequestParser()
+        self.reqparse.add_argument('obstacles')       
+        super(RestObstacles, self).__init__()
+        
+    def get(self):
+        obs = Obstacle.query.all()    # @UndefinedVariable
+        obList = {'obstacles': []}
+        for ob in obs:
+            obList['obstacles'].append({'id': ob.id, 'lat': ob.location.lat, 'lon': ob.location.lon});
+        return obList
+            
+    def put(self):            
+        args = self.reqparse.parse_args()
+        data = args['obstacles']
+        ob_data = json.loads(data)
+            
+        newObCount = 0
+        for ob in ob_data:  
+                                  
+            lat = float(ob['lat'])
+            lon = float(ob['lon'])
+            obExists = False
+            existingLocation = Location.query.filter_by(lat=lat,lon=lon).first() # @UndefinedVariable
+            if existingLocation is not None:
+                # something is already at this location. see if it is an obstacle
+                existingObstacle = Obstacle.query.filter_by(loc_id=existingLocation.id) # @UndefinedVariable
+                if existingObstacle is not None:
+                    obExists = True
+            
+            # create new obstacle only if one doesn't already exist
+            if not obExists:
+                newOb = Obstacle()
+                newLocation = Location(lat=lat, lon=lon)
+                db.session.add(newLocation)  # @UndefinedVariable
+                db.session.commit()
+                newOb.location = newLocation
+                db.session.add(newOb)  # @UndefinedVariable
+                newObCount = newObCount + 1
+                
+        db.session.commit()
+                    
+        return {
+                'result': {                           
+                           'msg': str(newObCount) + " obstacles created." 
+                           }
+                }
+                                            

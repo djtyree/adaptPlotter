@@ -14,7 +14,7 @@ migrate = Migrate(app, db)
 from main import models
 from main import views
 from main.rest import RestHelloWorld, RestNode, RestNodeList, RestNodeGoals,\
-    RestNodeLocation, RestNodeJumpPoints
+    RestNodeLocation, RestNodeJumpPoints, RestObstacles
 
 # setup RESTful API
 api.add_resource(RestHelloWorld, '/rest/api/hello')
@@ -23,6 +23,7 @@ api.add_resource(RestNode, '/rest/api/nodes/<int:node_id>')
 api.add_resource(RestNodeGoals, '/rest/api/nodes/<int:node_id>/goals')
 api.add_resource(RestNodeLocation, '/rest/api/nodes/<int:node_id>/location')
 api.add_resource(RestNodeJumpPoints, '/rest/api/nodes/<int:node_id>/jumppoints')
+api.add_resource(RestObstacles, '/rest/api/obstacles')
 
 # used to manage the app
 manager = Manager(app)
