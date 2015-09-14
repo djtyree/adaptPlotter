@@ -96,6 +96,8 @@ class RestNodeLocation(Resource):
                 return { 'currentLocation': {
                                              'lat': node.location.lat,
                                              'lon': node.location.lon,
+                                             'speed': node.location.speed,
+                                             'dir': node.location.dir
                                              } 
                         }
             
@@ -110,7 +112,7 @@ class RestNodeLocation(Resource):
             lat = args['lat']
             lon = args['lon']
             speed = args['speed']
-            bearing = args['dir']
+            dir = args['dir']
             node.location.lat = float(lat)
             node.location.lon = float(lon)
             node.location.speed = float(speed)
@@ -126,7 +128,54 @@ class RestNodeLocation(Resource):
                                'msg': 'New location correctly set' 
                                }
                     }
-# RestLocation
+# RestForces
+class RestNodeForces(Resource):
+    def __init__(self):
+        self.reqparse = reqparse.RequestParser()
+        self.reqparse.add_argument('force_speed')
+        self.reqparse.add_argument('force_dir')        
+        super(RestNodeForces, self).__init__()
+        
+    def get(self, node_id):
+        node = None        
+        nodes = Node.query.all()    # @UndefinedVariable
+        
+        if nodes:
+            for x in nodes:
+                if x.rid == node_id:
+                    node = x                    
+            if node:
+                return { 'forceVector': {
+                                             'force_speed': node.force_speed,
+                                             'force_dir': node.force_dir,
+                                             } 
+                        }
+            
+    def put(self, node_id):        
+        node = None
+        nodes = Node.query.all()    # @UndefinedVariable
+        for x in nodes:
+            if x.id == node_id:
+                node = x
+        if node:
+            args = self.reqparse.parse_args()
+            fspeed = args['force_speed']
+            fdir = args['force_dir']
+            node.force_speed = float(fspeed)
+            node.force_dir = float(fdir)
+            db.session.commit()
+            return {
+                    'result': {
+                               'node': node.name,
+                               'nid': node.id,
+                               'id': node.rid,
+                               'force_speed': node.force_speed, 
+                               'force_dir': node.force_dir, 
+                               'msg': 'New force vector correctly set' 
+                               }
+                    }
+                        
+# RestNodeJumpPoints
 class RestNodeJumpPoints(Resource):
     def __init__(self):
         self.reqparse = reqparse.RequestParser()
