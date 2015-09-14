@@ -32,16 +32,26 @@ def getAllData():
     map_g = { 'name': 'Goals', 'color': '#0000FF', 'data': [], 'marker': {'symbol': 'square', 'radius': 6}, 'zIndex': 2 }
     
     for leader in leaders:
-        map_n['data'].append(ChartPoint(x=leader.location.lat,y=leader.location.lon,color='#0000FF', name=leader.name,nid=leader.id, size=8).__dict__)
-        map_jp['data'].append(ChartPoint(x=leader.location.lat,y=leader.location.lon, name='-', node=leader.id).__dict__)
+        map_n['data'].append(ChartPoint(x=leader.location.lon,
+                                        y=leader.location.lat,
+                                        color='#0000FF', 
+                                        name=leader.name,
+                                        nid=leader.id, 
+                                        dir=leader.location.dir, 
+                                        speed=leader.location.speed, 
+                                        fdir=leader.force_dir, 
+                                        fspeed=leader.force_speed, 
+                                        size=8
+                                    ).__dict__)
+        map_jp['data'].append(ChartPoint(x=leader.location.lon,y=leader.location.lat, name='-', node=leader.id).__dict__)
         for jp in leader.jumppoints:
-            map_jp['data'].append(ChartPoint(x=jp.location.lat,y=jp.location.lon, name='Jump Point - ' + str(jp.id),id=jp.id, node=leader.id).__dict__)
+            map_jp['data'].append(ChartPoint(x=jp.location.lon,y=jp.location.lat, name='Jump Point - ' + str(jp.id),id=jp.id, node=leader.id).__dict__)
             if(jp.goal):
-                map_g['data'].append(ChartPoint(x=jp.location.lat,y=jp.location.lon, name='Goal - ' + str(jp.id),id=jp.id, node=leader.id).__dict__)
+                map_g['data'].append(ChartPoint(x=jp.location.lon,y=jp.location.lat, name='Goal - ' + str(jp.id),id=jp.id, node=leader.id).__dict__)
         for follower in leader.followers:
-            map_n['data'].append(ChartPoint(x=follower.location.lat,y=follower.location.lon, name=follower.name,nid=follower.id,lid=leader.id).__dict__)
+            map_n['data'].append(ChartPoint(x=follower.location.lon,y=follower.location.lat, name=follower.name,nid=follower.id,lid=leader.id).__dict__)
     for obj in obstacles:
-        map_o['data'].append(ChartPoint(x=obj.location.lat,y=obj.location.lon,name='Point - ' + str(obj.id)).__dict__)
+        map_o['data'].append(ChartPoint(x=obj.location.lon,y=obj.location.lat,name='Point - ' + str(obj.id)).__dict__)
 
     data = [map_n, map_jp, map_o, map_g]
     return jsonify({'status':'OK','data':data})
@@ -264,8 +274,12 @@ class ChartPoint(object):
     name = ""
     marker = ""
     size=6
+    speed=0.0
+    dir=0.0
+    fspeed=0.0
+    fdir=0.0
      
-    def __init__(self, x, y, color=None, name=None, symbol=None, nid=None, lid=None, node=None, id=None, size=None):
+    def __init__(self, x, y, color=None, name=None, symbol=None, nid=None, lid=None, node=None, id=None, size=None, speed=None, dir=None, fspeed=None, fdir=None):
         self.x = x
         self.y = y
         if nid is not None:
@@ -280,6 +294,14 @@ class ChartPoint(object):
             self.color = color
         if name is not None:
             self.name = name
+        if dir is not None:
+            self.dir = dir
+        if speed is not None:
+            self.speed = speed
+        if fdir is not None:
+            self.fdir = fdir
+        if fspeed is not None:
+            self.fspeed = fspeed
         if symbol is not None or size is not None:
             self.marker = {}
             if symbol is not None:

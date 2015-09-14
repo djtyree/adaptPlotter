@@ -109,8 +109,12 @@ class RestNodeLocation(Resource):
             args = self.reqparse.parse_args()
             lat = args['lat']
             lon = args['lon']
+            speed = args['speed']
+            bearing = args['dir']
             node.location.lat = float(lat)
             node.location.lon = float(lon)
+            node.location.speed = float(speed)
+            node.location.dir = float(dir)
             db.session.commit()
             return {
                     'result': {
@@ -177,7 +181,7 @@ class RestNodeJumpPoints(Resource):
                     node_jp_lat = node_jp.location.lat
                     node_jp_lon = node_jp.location.lon
                     if node_jp.goal and lat == node_jp_lat and lon == node_jp_lon:
-                        new_jp.goal = 1
+                        new_jp.goal = True
                         
                 node.jumppoints.append(new_jp)
             db.session.commit()

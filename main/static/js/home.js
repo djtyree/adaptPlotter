@@ -32,8 +32,10 @@ utils.findNode = function(series_index,nid) {
 utils.drawNodeLinks = function() {
 	// link followers to leaders
 	$('.nodeLink').remove();
+	$('.nodeVector').remove();
     var series_index = chart.series.inArray('Node', "name")
     $.each(chart.series[series_index].data, function(i, node) {
+    	// draw line to its leader
     	if(node.lid !== undefined && node.lid != 0) {
     		leader_id = utils.findNode(series_index, node.lid)
     		leader = chart.series[series_index].data[leader_id]
@@ -45,18 +47,45 @@ utils.drawNodeLinks = function() {
     		                    	 class: 'nodeLink'
     		                    }).add();
     	}
+    	// draw current speed and dir
+    	if(node.speed !== 0.0 || node.dir != 0.0) {
+    		x = node.plotX
+    		y = node.plotY
+    		newX = Math.cos(((node.dir-90)%360)*Math.PI/180) * (node.speed/3.0*100) + node.plotX
+    		newY = Math.sin(((node.dir-90)%360)*Math.PI/180) * (node.speed/3.0*100) + node.plotY
+    		chart.renderer.path(['M',node.plotX + chart.plotLeft, node.plotY + chart.plotTop,
+    		                     'L',newX + chart.plotLeft, newY + chart.plotTop]).attr({
+    		                    	 'stroke-width': 2,
+    		                    	 stroke: 'black',
+    		                    	 class: 'nodeVector'
+    		                    }).add();
+    	}
+    	// draw current force vector
+    	if(node.fspeed !== 0.0 || node.fdir != 0.0) {
+    		x = node.plotX
+    		y = node.plotY
+    		newX = Math.cos(((node.fdir-90)%360)*Math.PI/180) * (node.fspeed/1.0*100) + node.plotX
+    		newY = Math.sin(((node.fdir-90)%360)*Math.PI/180) * (node.fspeed/1.0*100) + node.plotY
+    		chart.renderer.path(['M',node.plotX + chart.plotLeft, node.plotY + chart.plotTop,
+    		                     'L',newX + chart.plotLeft, newY + chart.plotTop]).attr({
+    		                    	 'stroke-width': 2,
+    		                    	 stroke: 'yellow',
+    		                    	 class: 'nodeForce'
+    		                    }).add();
+    	}
     });	
 }
 
 utils.addGoal= function(e) {
     var x = e.xAxis[0].value;
     var y = e.yAxis[0].value;
-    var series = this.series[1];
+    var jp_series = this.series[1];
+    var g_series = this.series[3];
     
 	var my_data = []
 	mydata = {
-        'lat':  x,
-       	'lon': y,
+        'lon':  x,
+       	'lat': y,
        	'leader': 0
     }
 	$.ajax({
@@ -68,7 +97,8 @@ utils.addGoal= function(e) {
 		console.log(response);
         if(response.status == 'OK') {  
     		// Add it
-    		series.addPoint([x, y]);
+    		jp_series.addPoint([x, y]);
+    		g_series.addPoint([x, y]);
         } else {
         	// didn't receive correct status code from server
         	// error occured
@@ -126,6 +156,14 @@ $(function () {
         },
         title: {
             text: 'Overview Map'
+        },
+        xAxis: {
+        	min:  -79.970798,
+        	max:  -79.96907
+        },
+        yAxis: {
+        	min:  32.9960376,
+            max: 32.9970744
         },
         plotOptions: {
             scatter: {

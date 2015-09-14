@@ -17,11 +17,13 @@ class Location(db.Model):
     # columns
     id = db.Column(db.Integer(), primary_key=True)
     lat = db.Column(db.Float)    
-    lon = db.Column(db.Float)          
+    lon = db.Column(db.Float) 
+    speed = db.Column(db.Float, default=0.0) 
+    dir = db.Column(db.Float, default=0.0)          
 
     # class functions
     def __repr__(self):
-        return '<Location %d - lat: %f, lon: %f>' % (self.id, self.lat, self.lon)
+        return '<Location %d - lat: %f, lon: %f, dir: %f, speed: %f>' % (self.id, self.lat, self.lon, self.dir, self.speed)
 
 # Node Class    
 class Node(db.Model):
@@ -34,6 +36,8 @@ class Node(db.Model):
     name = db.Column(db.String(64))
     leader_id = db.Column(db.Integer(), db.ForeignKey('node.id'))    
     loc_id = db.Column(db.Integer, db.ForeignKey('location.id'))
+    force_dir = db.Column(db.Float, default=0.0) 
+    force_speed = db.Column(db.Float, default=0.0)  
     
     # relationships
     location = db.relationship("Location",backref=db.backref("node", uselist=False), cascade="all, delete-orphan", single_parent=True)
