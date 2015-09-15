@@ -39,30 +39,36 @@
     	<input id="jumppoints-{{ index }}-jp_id" name="jumppoints-{{ index }}-jp_id" type="hidden" value="{{ jumppoint.jp_id.data }}">
     	<input id="jumppoints-{{ index }}-pos" name="jumppoints-{{ index }}-pos" type="hidden" class="position" value="{{ index }}">
 		<td width="10%"><span class="move"></span></td>
-		{% if jumppoint.goal.data %}
-			<td width="10%"><input type="checkbox" id="jumppoints-{{ index }}-goal" name="jumppoints-{{ index }}-goal" value="{{ jumppoint.goal.data }}" checked/></td>
-		{% else %}
-			<td width="10%"><input type="checkbox" id="jumppoints-{{ index }}-goal" name="jumppoints-{{ index }}-goal" value="{{ jumppoint.goal.data }}"/></td>
-		{% endif %}
-   		<td width="30%"><input type="text" id="jumppoints-{{ index }}-lat" name="jumppoints-{{ index }}-lat" value="{{ jumppoint.lat.data }}"/></td>
-   		<td width="30%"><input type="text" id="jumppoints-{{ index }}-lon" name="jumppoints-{{ index }}-lon" value="{{ jumppoint.lon.data }}"/></td>
+   		<td width="40%"><input type="text" id="jumppoints-{{ index }}-lat" name="jumppoints-{{ index }}-lat" value="{{ jumppoint.lat.data }}"/></td>
+   		<td width="40%"><input type="text" id="jumppoints-{{ index }}-lon" name="jumppoints-{{ index }}-lon" value="{{ jumppoint.lon.data }}"/></td>
+		<td width="10%"><span class="remove"></span></td>
+	</tr>
+{% endmacro %}
+
+{% macro render_goal(index, goal) %}
+	<tr class="row">
+    	<input id="goals-{{ index }}-goal_id" name="goals-{{ index }}-goal_id" type="hidden" value="{{ goal.goal_id.data }}">
+    	<input id="goals-{{ index }}-pos" name="goals-{{ index }}-pos" type="hidden" class="position" value="{{ index }}">
+		<td width="10%"><span class="move"></span></td>
+   		<td width="40%"><input type="text" id="goals-{{ index }}-lat" name="goals-{{ index }}-lat" value="{{ goal.lat.data }}"/></td>
+   		<td width="40%"><input type="text" id="goals-{{ index }}-lon" name="goals-{{ index }}-lon" value="{{ goal.lon.data }}"/></td>
 		<td width="10%"><span class="remove"></span></td>
 	</tr>
 {% endmacro %}
 
 {% macro render_jumppoint_fields(form) %}
+	<div >JumpPoints</div>
 	<div class="repeat">
       <table class="wrapper" width="100%">
         <thead>
           <tr>
               <th><span>Move</span></th>
-              <th><span>Goal</span></th>
               <th><span>Latitude</span></th>
               <th><span>Longitude</span></th>
               <th><span>Remove</span></th>
           </tr>
           <tr>
-              <th class="new" width="10%" colspan="5"><span class="add">Add</span></th>
+              <th class="new" width="10%" colspan="4"><span class="add">Add</span></th>
           </tr>
         </thead>
         <tbody class="container">
@@ -83,6 +89,45 @@
           {% else %}
             <tr>
               <td colspan=6>No jumppoints.</td>
+            </tr>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+{% endmacro %}
+
+{% macro render_goal_fields(form) %}
+	<div >Goals</div>
+	<div class="repeat">
+      <table class="wrapper" width="100%">
+        <thead>
+          <tr>
+              <th><span>Move</span></th>
+              <th><span>Latitude</span></th>
+              <th><span>Longitude</span></th>
+              <th><span>Remove</span></th>
+          </tr>
+          <tr>
+              <th class="new" width="10%" colspan="4"><span class="add">Add</span></th>
+          </tr>
+        </thead>
+        <tbody class="container">
+          <tr class="template row">
+          	{# <input class="csrf-tokens" id="goals-{{ '{{' }}row-count-placeholder{{ '}}' }}-csrf_token" name="goals-{{ '{{' }}row-count-placeholder{{ '}}' }}-csrf_token" type="hidden" value="{{ '{{' }}csrf-token-placeholder{{ '}}' }}"> #}
+          	<input id="goals-{{ '{{' }}row-count-placeholder{{ '}}' }}-goal_id" name="goals-{{ '{{' }}row-count-placeholder{{ '}}' }}-goal_id" type="hidden" value="0">
+          	<input id="goals-{{ '{{' }}row-count-placeholder{{ '}}' }}-pos" name="goals-{{ '{{' }}row-count-placeholder{{ '}}' }}-pos" type="hidden" class="position" value="{{ '{{' }}row-count-placeholder{{ '}}' }}">
+            <td width="10%"><span class="move"></span></td>            
+            <td width="40%"><input type="text" id="goals-{{ '{{' }}row-count-placeholder{{ '}}' }}-lat" name="goals-{{ '{{' }}row-count-placeholder{{ '}}' }}-lat" /></td>
+            <td width="40%"><input type="text" id="goals-{{ '{{' }}row-count-placeholder{{ '}}' }}-lon" name="goals-{{ '{{' }}row-count-placeholder{{ '}}' }}-lon" /></td>
+		    <td width="10%"><span class="remove"></span></td>
+          </tr>
+          {% if form.goals|length != 0 %}
+            {% for goal in form.goals %}
+            	{{ render_goal(loop.index0, goal) }}       
+            {% endfor %}
+          {% else %}
+            <tr>
+              <td colspan=6>No goals.</td>
             </tr>
           {% endif %}
         </tbody>

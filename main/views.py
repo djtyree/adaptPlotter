@@ -1,6 +1,6 @@
 from flask import render_template, jsonify, request, flash, redirect, url_for, json
 from main import app, db
-from models import Node, Location, Obstacle, JumpPoint
+from models import Node, Location, Obstacle, JumpPoint, Goal
 from forms import NodeForm, ObstacleForm
 import random
 
@@ -46,8 +46,8 @@ def getAllData():
         map_jp['data'].append(ChartPoint(x=leader.location.lon,y=leader.location.lat, name='-', node=leader.id).__dict__)
         for jp in leader.jumppoints:
             map_jp['data'].append(ChartPoint(x=jp.location.lon,y=jp.location.lat, name='Jump Point - ' + str(jp.id),id=jp.id, node=leader.id).__dict__)
-            if(jp.goal):
-                map_g['data'].append(ChartPoint(x=jp.location.lon,y=jp.location.lat, name='Goal - ' + str(jp.id),id=jp.id, node=leader.id).__dict__)
+        for goal in leader.goals:
+            map_g['data'].append(ChartPoint(x=goal.location.lon,y=goal.location.lat, name='Goal - ' + str(goal.id),id=goal.id, node=leader.id).__dict__)
         for follower in leader.followers:
             map_n['data'].append(ChartPoint(x=follower.location.lon,y=follower.location.lat, name=follower.name,nid=follower.id,lid=leader.id).__dict__)
     for obj in obstacles:
@@ -85,7 +85,10 @@ def addEditNode(node_id):
  
             jumppoints = []
             for jp in node.jumppoints:
-                form.jumppoints.append_entry({"jp_id": jp.id, "lat": jp.location.lat, "lon":jp.location.lon, "goal": jp.goal })  
+                form.jumppoints.append_entry({"jp_id": jp.id, "lat": jp.location.lat, "lon":jp.location.lon })
+            goals = []
+            for goal in node.goals:
+                form.goals.append_entry({"goal_id": goal.id, "lat": goal.location.lat, "lon":goal.location.lon })  
     elif request.method == 'POST' and form.validate():  # @UndefinedVariable
         if node is None:
             #new node has passed validation, add to db
@@ -103,11 +106,22 @@ def addEditNode(node_id):
                 
                 jp.location = location
                 jp.position = int(point['pos']) + 1
-                jp.goal = point['goal']
                 
                 db.session.add(jp)
                 node.jumppoints.append(jp)
             
+            for index, point in enumerate(form.goals.data):
+                goal = Goal()
+                
+                location = Location(lat=point['lat'], lon=point['lon'])
+                db.session.add(location)  # @UndefinedVariable
+                
+                goal.location = location
+                goal.position = int(point['pos']) + 1
+                
+                db.session.add(goal)
+                node.goals.append(goal)
+                
             db.session.commit()  # @UndefinedVariable
             flash("Node has been created")
         else: 
@@ -134,15 +148,13 @@ def addEditNode(node_id):
                     db.session.add(location)  # @UndefinedVariable
                 
                     newjp.location = location
-                    newjp.position = int(jp['pos']) + 1        
-                    newjp.goal = jp['goal']            
+                    newjp.position = int(jp['pos']) + 1            
                     db.session.add(newjp)
                     node.jumppoints.append(newjp)
                 else: 
                     # found existing point. update and remove from delete list
                     savedjp = JumpPoint.query.get(jp['jp_id'])   # @UndefinedVariable
                     savedjp.position = int(jp['pos']) + 1
-                    savedjp.goal = jp['goal']
                     savedLoc = Location.query.get(savedjp.loc_id)   # @UndefinedVariable
                     savedLoc.lat = jp['lat']
                     savedLoc.lon = jp['lon']
@@ -153,6 +165,34 @@ def addEditNode(node_id):
                 jp= JumpPoint.query.get(id)  # @UndefinedVariable
                 db.session.delete(jp)
             
+            deleteList = [] 
+            for goal in node.goals:
+                deleteList.append(goal.id)
+            for index, goal in enumerate(form.goals.data):
+                if int(goal['goal_id']) == 0:
+                    
+                    newgoal = Goal()
+                
+                    location = Location(lat=goal['lat'], lon=goal['lon'])
+                    db.session.add(location)  # @UndefinedVariable
+                
+                    newgoal.location = location
+                    newgoal.position = int(goal['pos']) + 1            
+                    db.session.add(newgoal)
+                    node.jumppoints.append(newgoal)
+                else: 
+                    # found existing point. update and remove from delete list
+                    savedGoal = Goal.query.get(goal['goal_id'])   # @UndefinedVariable
+                    savedGoal.position = int(goal['pos']) + 1
+                    savedLoc = Location.query.get(savedGoal.loc_id)   # @UndefinedVariable
+                    savedLoc.lat = goal['lat']
+                    savedLoc.lon = goal['lon']
+            
+                    deleteList.remove(int(goal['goal_id']))
+                    
+            for id in deleteList:
+                goal= Goal.query.get(id)  # @UndefinedVariable
+                db.session.delete(goal)
             db.session.commit()                    
             flash("Node has been updated")
         
@@ -197,8 +237,8 @@ def addEditObstacle(oid):
         
         # after creating the new state, redirect them back to dce config page
         return redirect(url_for("obstaclePage"))    
-    return render_template("obstacleForm.html", form=form)
-
+    return render_template("obstacleForm.html", form=form) 
+    
 # Node View page
 @app.route('/node')
 def nodePage():    
@@ -224,8 +264,13 @@ def deleteData():
             follower.leader_id = 0
         db.session.delete(node) 
     elif type =='obstacle':
-        obstacle = Obstacle.query.filter_by(id=id).first()  # @UndefinedVariable
-        db.session.delete(obstacle)
+        if id== "all":
+            obstacles = Obstacle.query.all()  # @UndefinedVariable
+            for ob in obstacles:
+                db.session.delete(ob)
+        else:
+            obstacle = Obstacle.query.filter_by(id=id).first()  # @UndefinedVariable
+            db.session.delete(obstacle)
         msg = "Obstacle has been deleted."
     else:
         return jsonify({'status': "ERROR", 'msg':'Data type was not present or unrecognized '})
@@ -244,16 +289,15 @@ def addGoal():
     if int(lid) == 0:
         # no leader specified, grab first leader in db
         leader = Node.query.filter_by(leader_id=0).first()  # @UndefinedVariable
-        jp = JumpPoint()
+        goal = Goal()
         location = Location(lat=lat, lon=lon)
         db.session.add(location)  # @UndefinedVariable
         
-        jp.location = location
-        jp.position = len(leader.jumppoints) + 1
-        jp.goal = True
+        goal.location = location
+        goal.position = len(leader.jumppoints) + 1
         
-        db.session.add(jp)
-        leader.jumppoints.append(jp)
+        db.session.add(goal)
+        leader.goals.append(goal)
         db.session.commit()
         return jsonify({'status':'OK','msg': "Goal Added"})    
     

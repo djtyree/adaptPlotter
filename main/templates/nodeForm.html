@@ -1,4 +1,4 @@
-{% from "__formhelpers.html" import render_field, render_jumppoint_fields %}
+{% from "__formhelpers.html" import render_field, render_jumppoint_fields, render_goal_fields %}
 {% extends "layout.html" %}
 {% block page_header %}
   <script type="text/javascript" src="{{ url_for('static', filename='js/repeatable-fields.js') }}"></script>
@@ -22,6 +22,7 @@
       <div class="node text lat">{{ render_field(form.location.lat) }}</div>      
       <div class="node text lon">{{ render_field(form.location.lon) }}</div>
       {{ render_jumppoint_fields(form) }}
+      {{ render_goal_fields(form) }}
     </dl>
     <input class="btn" type=submit value=Submit>
   </form>

@@ -97,7 +97,7 @@ utils.addGoal= function(e) {
 		console.log(response);
         if(response.status == 'OK') {  
     		// Add it
-    		jp_series.addPoint([x, y]);
+    		//jp_series.addPoint([x, y]);
     		g_series.addPoint([x, y]);
         } else {
         	// didn't receive correct status code from server
@@ -185,7 +185,7 @@ $(function () {
                 },
                 tooltip: {
                     headerFormat: '<b>{point.key}</b><br>',
-                    pointFormat: 'Location - ({point.x}, {point.y})'
+                    pointFormat: 'Location: ({point.y}, {point.x})'
                 }
             },
         	series: {
