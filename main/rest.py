@@ -119,8 +119,8 @@ class RestNodeLocation(Resource):
             #print "Location: lat=" + str(lat) + " lon=" + str(lon)
             #if speed is not None:
             #    print "   - speed= " + str(speed)
-            #if dir is not None:
-            #    print "   - dir= " + str(dir)
+            if dir is not None:
+                print "   - dir= " + str(dir)
             
                       
             node.location.lat = float(lat)
@@ -173,7 +173,7 @@ class RestNodeForces(Resource):
             args = self.reqparse.parse_args()
             fspeed = args['force_speed']
             fdir = args['force_dir']
-            print "Force: speed=" + fspeed + " dir=" + fdir
+            #print "Force: speed=" + fspeed + " dir=" + fdir
             node.force_speed = float(fspeed)
             node.force_dir = float(fdir)
             db.session.commit()
@@ -219,7 +219,7 @@ class RestNodeJumpPoints(Resource):
         if node:
             args = self.reqparse.parse_args()
             data = args['jps']
-            print "JumpPoints: " + data
+            #print "JumpPoints: " + data
             jp_data = json.loads(data)
             
             node_jumppoints = node.jumppoints
@@ -267,7 +267,7 @@ class RestObstacles(Resource):
         args = self.reqparse.parse_args()
         data = args['obstacles']
         ob_data = json.loads(data)
-        print "Obstacles" + data
+        #print "Obstacles" + data
         newObCount = 0
         for ob in ob_data:  
                                   

@@ -150,7 +150,8 @@ svg .title,
 	height:100% !important;
 	}
 #chart {
-	height: 600px;
+	height: 1000px;
+	width: 900px;
 }
 
 /* -------------------------- */

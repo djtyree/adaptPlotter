@@ -147,7 +147,8 @@ $(function () {
         	renderTo: 'chart',
             type: 'scatter',
             zoomType: 'xy',
-            width: 1000,
+            width: 925,
+            plotBackgroundImage: '/static/images/track.png',
             events: {
             	load: requestData,
                 redraw: utils.drawNodeLinks,
@@ -158,13 +159,20 @@ $(function () {
             text: 'Overview Map'
         },
         xAxis: {
-        	min:  -79.970798,
-        	max:  -79.96907
+        	labels: {enabled:false},
+        	min: -79.970725,
+        	max: -79.969341
+        	//min:  -79.970895,
+        	//max:  -79.968527
         },
         yAxis: {
-        	min:  32.9960376,
-            max: 32.9970744
+        	labels: {enabled:false},
+        	min: 32.995823,
+        	max: 32.997072
+        	//min:  32.995984,
+            //max: 32.997162
         },
+
         plotOptions: {
             scatter: {
                 marker: {
@@ -196,7 +204,7 @@ $(function () {
     });
     renderer = new Highcharts.Renderer(
         $('#chart')[0],
-        1000,
-        400
+        925,
+        1000
     );
 });
