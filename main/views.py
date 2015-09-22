@@ -1,9 +1,9 @@
-from flask import render_template, jsonify, request, flash, redirect, url_for, json
-from main import app, db
+from flask import render_template, jsonify, request, flash, redirect, url_for, json, Response
+from main import app, db, subscriptions
 from models import Node, Location, Obstacle, JumpPoint, Goal
 from forms import NodeForm, ObstacleForm
 import random
-
+from gevent.queue import Queue
 
 @app.route('/')
 def homePage():
@@ -303,6 +303,45 @@ def addGoal():
     
     return jsonify({'status':'ERRROR','msg': msg})
 
+class ServerSentEvent(object):
+    def __init__(self, data):
+        self.data = data
+        self.event = None
+        self.id = None
+        self.desc_map = {
+            self.data : "data",
+            self.event : "dce_update",
+            self.id : "id"
+        }
+
+    def encode(self):
+        if not self.data:
+            return ""
+        lines = ["%s: %s" % (v, k) 
+                 for k, v in self.desc_map.iteritems() if k]
+        
+        return "%s\n\n" % "\n"  .join(lines)
+    
+@app.route('/get_subs')
+def getSubs():
+    return "Currently %d subscriptions" % len(subscriptions)
+    
+@app.route('/sse_event_source')
+def sse_request():
+    def gen():
+        global subscriptions
+        q = Queue()
+        subscriptions.append(q)
+        try:
+            while True:
+                result = q.get()
+                ev = ServerSentEvent(str(result))
+                yield ev.encode()
+        except GeneratorExit: # Or maybe use flask signals
+            subscriptions.remove(q)
+
+    return Response(gen(), mimetype="text/event-stream")
+
 #####################################################################
 ###                      Helper Functions                         ###
 #####################################################################
@@ -373,3 +412,44 @@ def multikeysort(items, columns):
         else:
             return 0
     return sorted(items, cmp=comparer)
+
+def publish_events(reqType=None, nid=0):
+    global subscriptions
+    def notify():
+        data = None
+        msg = ""
+        if len(subscriptions):
+            if reqType=="nodeLocation":
+                #node = Node.query.get(id)
+                #msg = json.dumps(dict(nid=node.id, rid=node.rid, lat=node.location.lat, lon=node.location.lon))                
+                msg = "hey"
+            if msg is not "":
+                #msg = json.dumps(dict(run=run.id, dce=dce.id, state=state.id, state_name=state.name, start_time=run.start_time))
+                for sub in subscriptions[:]:
+                    sub.put(msg)
+    notify()  
+    print "Got Here"
+    
+def publish_event(reqType=None, id=None):
+    global subscriptions
+    # need to run import inside this function to avoid a circular import onLoad
+    
+    def notify():
+        data = None
+        msg = ""
+        if len(subscriptions):
+            if reqType=="nodeLocation":
+                #node = Node.query.get(id)
+                #msg = json.dumps(dict(nid=node.id, rid=node.rid, lat=node.location.lat, lon=node.location.lon))                
+                msg = "hey"
+            else:
+                return "ERROR" 
+        
+                 
+            if data is not None:
+                #msg = json.dumps(dict(run=run.id, dce=dce.id, state=state.id, state_name=state.name, start_time=run.start_time))
+                for sub in subscriptions[:]:
+                    sub.put(msg)
+    
+    notify()   
+    return "OK"       

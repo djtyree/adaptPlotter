@@ -10,6 +10,9 @@ api = Api(app)
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
+#used for sse push events
+subscriptions = []
+
 # Imports
 from main import models
 from main import views
@@ -25,6 +28,8 @@ api.add_resource(RestNodeLocation, '/rest/api/nodes/<int:node_id>/location')
 api.add_resource(RestNodeForces, '/rest/api/nodes/<int:node_id>/force')
 api.add_resource(RestNodeJumpPoints, '/rest/api/nodes/<int:node_id>/jumppoints')
 api.add_resource(RestObstacles, '/rest/api/obstacles')
+
+
 
 # used to manage the app
 manager = Manager(app)

@@ -10,6 +10,7 @@ from main import db
 from models import Node, JumpPoint, Location, Obstacle
 
 # function imports
+from views import publish_event, publish_events
 
 ###################################################################
 class RestHelloWorld(Resource):
@@ -130,6 +131,9 @@ class RestNodeLocation(Resource):
             if dir is not None:    
                 node.location.dir = float(dir)
             db.session.commit()
+            publish_events("nodeLocation")
+            publish_event("nodeLocation", node.id)
+            
             return {
                     'result': {
                                'node': node.name,

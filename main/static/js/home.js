@@ -207,4 +207,24 @@ $(function () {
         925,
         1000
     );
+    
+    // comment out next line if you want to disable browser auto update
+	createEventSource();
 });
+
+function createEventSource() {
+	if (!!window.EventSource) {
+		var source = new EventSource('/sse_event_source');
+		source.onmessage = function(e) {
+			var obj = JSON.parse(e.data)
+		};
+		source.addEventListener("plot_data", function(e) {
+			var obj = JSON.parse(e.data)
+		}, false);
+		source.onerror = function(e) {
+            $(".page-header").after('<div class="flash error">Browser lost connection to server.</div>');
+			alert("Browser lost connection to server.\nRefresh page immediately.");
+			source.close();
+		};
+	}
+}
