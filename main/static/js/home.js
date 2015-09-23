@@ -33,6 +33,7 @@ utils.drawNodeLinks = function() {
 	// link followers to leaders
 	$('.nodeLink').remove();
 	$('.nodeVector').remove();
+	$('.nodeForce').remove();
     var series_index = chart.series.inArray('Node', "name")
     $.each(chart.series[series_index].data, function(i, node) {
     	// draw line to its leader
@@ -217,7 +218,19 @@ function createEventSource() {
 		var source = new EventSource('/sse_event_source');
 		source.onmessage = function(e) {
 			var obj = JSON.parse(e.data)
-		};
+			if(obj.type == "nodeLocation") {
+				var series_index = chart.series.inArray('Node', "name")
+				var jp_series = chart.series.inArray('Jump Points', "name")
+				series_id = utils.findNode(series_index, obj.nid)
+			    node = chart.series[series_index].data[series_id]
+				node.x = obj.lon
+				node.y = obj.lat			
+				chart.series[series_index].data[series_id].update([obj.lon, obj.lat])
+				chart.series[jp_series].data[0].update([obj.lon, obj.lat])
+				utils.drawNodeLinks()
+			}
+			
+		}  
 		source.addEventListener("plot_data", function(e) {
 			var obj = JSON.parse(e.data)
 		}, false);

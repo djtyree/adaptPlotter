@@ -131,8 +131,7 @@ class RestNodeLocation(Resource):
             if dir is not None:    
                 node.location.dir = float(dir)
             db.session.commit()
-            publish_events("nodeLocation")
-            publish_event("nodeLocation", node.id)
+            publish_events("nodeLocation", node.id)
             
             return {
                     'result': {

@@ -310,7 +310,7 @@ class ServerSentEvent(object):
         self.id = None
         self.desc_map = {
             self.data : "data",
-            self.event : "dce_update",
+            self.event : "adapt_update",
             self.id : "id"
         }
 
@@ -413,43 +413,23 @@ def multikeysort(items, columns):
             return 0
     return sorted(items, cmp=comparer)
 
-def publish_events(reqType=None, nid=0):
+def publish_events(reqType=None, rid=0):
     global subscriptions
+    if rid==0:
+        print "No robot id"
+        return
     def notify():
         data = None
         msg = ""
         if len(subscriptions):
             if reqType=="nodeLocation":
+                print "Node id=" + str(rid)
+                node = Node.query.get(rid)
                 #node = Node.query.get(id)
                 #msg = json.dumps(dict(nid=node.id, rid=node.rid, lat=node.location.lat, lon=node.location.lon))                
-                msg = "hey"
+                msg =  json.dumps(dict(type=reqType, nid=node.id, rid=node.rid, lat=node.location.lat, lon=node.location.lon))  
             if msg is not "":
                 #msg = json.dumps(dict(run=run.id, dce=dce.id, state=state.id, state_name=state.name, start_time=run.start_time))
                 for sub in subscriptions[:]:
                     sub.put(msg)
     notify()  
-    print "Got Here"
-    
-def publish_event(reqType=None, id=None):
-    global subscriptions
-    # need to run import inside this function to avoid a circular import onLoad
-    
-    def notify():
-        data = None
-        msg = ""
-        if len(subscriptions):
-            if reqType=="nodeLocation":
-                #node = Node.query.get(id)
-                #msg = json.dumps(dict(nid=node.id, rid=node.rid, lat=node.location.lat, lon=node.location.lon))                
-                msg = "hey"
-            else:
-                return "ERROR" 
-        
-                 
-            if data is not None:
-                #msg = json.dumps(dict(run=run.id, dce=dce.id, state=state.id, state_name=state.name, start_time=run.start_time))
-                for sub in subscriptions[:]:
-                    sub.put(msg)
-    
-    notify()   
-    return "OK"       
