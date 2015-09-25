@@ -10,7 +10,7 @@ from main import db
 from models import Node, JumpPoint, Location, Obstacle
 
 # function imports
-from views import publish_event, publish_events
+from views import publish_events
 
 ###################################################################
 class RestHelloWorld(Resource):

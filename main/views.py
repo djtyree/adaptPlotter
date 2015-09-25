@@ -424,7 +424,7 @@ def publish_events(reqType=None, rid=0):
         if len(subscriptions):
             if reqType=="nodeLocation":
                 print "Node id=" + str(rid)
-                node = Node.query.get(rid)
+                node = Node.query.get(rid)    # @UndefinedVariable
                 #node = Node.query.get(id)
                 #msg = json.dumps(dict(nid=node.id, rid=node.rid, lat=node.location.lat, lon=node.location.lon))                
                 msg =  json.dumps(dict(type=reqType, nid=node.id, rid=node.rid, lat=node.location.lat, lon=node.location.lon))  
