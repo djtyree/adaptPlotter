@@ -228,6 +228,17 @@ function createEventSource() {
 				chart.series[series_index].data[series_id].update([obj.lon, obj.lat])
 				chart.series[jp_series].data[0].update([obj.lon, obj.lat])
 				utils.drawNodeLinks()
+			} else if(obj.type == "nodeJumpPoints") {
+				var series_index = chart.series.inArray('Node', "name")
+				var jp_series = chart.series.inArray('Jump Points', "name")
+				series_id = utils.findNode(series_index, obj.nid)
+			    node = chart.series[series_index].data[series_id]
+				node.x = obj.lon
+				node.y = obj.lat			
+				map_jp['data'].append(ChartPoint(x=jp.location.lon,y=jp.location.lat, name='Jump Point - ' + str(jp.id),id=jp.id, node=leader.id).__dict__)
+				chart.series[series_index].data[series_id].update([obj.lon, obj.lat])
+				chart.series[jp_series].data[0].update([obj.lon, obj.lat])
+				utils.drawNodeLinks()
 			}
 			
 		}  

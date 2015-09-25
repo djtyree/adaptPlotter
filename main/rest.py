@@ -244,6 +244,7 @@ class RestNodeJumpPoints(Resource):
                         
                 node.jumppoints.append(new_jp)
             db.session.commit()
+            publish_events("nodeJumpPoints", node.id)
             return {
                     'result': {
                                'node': node.name,

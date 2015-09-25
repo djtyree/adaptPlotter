@@ -423,11 +423,21 @@ def publish_events(reqType=None, rid=0):
         msg = ""
         if len(subscriptions):
             if reqType=="nodeLocation":
-                print "Node id=" + str(rid)
                 node = Node.query.get(rid)    # @UndefinedVariable
                 #node = Node.query.get(id)
                 #msg = json.dumps(dict(nid=node.id, rid=node.rid, lat=node.location.lat, lon=node.location.lon))                
-                msg =  json.dumps(dict(type=reqType, nid=node.id, rid=node.rid, lat=node.location.lat, lon=node.location.lon))  
+                msg =  json.dumps(dict(type=reqType, nid=node.id, rid=node.rid, lat=node.location.lat, lon=node.location.lon))
+            elif reqType=="nodeJumpPoints":
+                node = Node.query.get(rid)    # @UndefinedVariable
+                #node = Node.query.get(id)
+                #msg = json.dumps(dict(nid=node.id, rid=node.rid, lat=node.location.lat, lon=node.location.lon))    
+                data = []
+                for jp in node.jumppoints:
+                    data.append(ChartPoint(x=jp.location.lon,y=jp.location.lat, name='Jump Point - ' + str(jp.id),id=jp.id, node=node.id).__dict__)
+                jsonstr = {"type": reqType, "data": data}
+                msg = json.dumps(jsonstr)
+   
+                #msg =  json.dumps(dict(type=reqType, nid=node.id, rid=node.rid, lat=node.location.lat, lon=node.location.lon))  
             if msg is not "":
                 #msg = json.dumps(dict(run=run.id, dce=dce.id, state=state.id, state_name=state.name, start_time=run.start_time))
                 for sub in subscriptions[:]:
