@@ -413,10 +413,10 @@ def multikeysort(items, columns):
             return 0
     return sorted(items, cmp=comparer)
 
-def publish_events(reqType=None, rid=0):
+def publish_events(reqType=None, rid=0, lat=0, lon=0):
     global subscriptions
-    if rid==0:
-        print "No robot id"
+    if rid==0 and lat==0 and lon==0:
+        print "No data"
         return
     def notify():
         data = None
@@ -437,7 +437,13 @@ def publish_events(reqType=None, rid=0):
                 jsonstr = {"type": reqType, "data": data}
                 msg = json.dumps(jsonstr)
    
-                #msg =  json.dumps(dict(type=reqType, nid=node.id, rid=node.rid, lat=node.location.lat, lon=node.location.lon))  
+                #msg =  json.dumps(dict(type=reqType, nid=node.id, rid=node.rid, lat=node.location.lat, lon=node.location.lon))
+            elif reqType=="newObstacle":  
+                data = []
+                data.append(ChartPoint(x=lon,y=lat, name='Obstacle').__dict__)
+                jsonstr = {"type": reqType, "data": data}
+                msg = json.dumps(jsonstr)
+                
             if msg is not "":
                 #msg = json.dumps(dict(run=run.id, dce=dce.id, state=state.id, state_name=state.name, start_time=run.start_time))
                 for sub in subscriptions[:]:

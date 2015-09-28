@@ -109,7 +109,7 @@ class RestNodeLocation(Resource):
         node = None
         nodes = Node.query.all()    # @UndefinedVariable
         for x in nodes:
-            if x.id == node_id:
+            if x.rid == node_id:
                 node = x
         if node:
             args = self.reqparse.parse_args()
@@ -131,7 +131,7 @@ class RestNodeLocation(Resource):
             if dir is not None:    
                 node.location.dir = float(dir)
             db.session.commit()
-            publish_events("nodeLocation", node.id)
+            publish_events(reqType="nodeLocation", rid=node_id)
             
             return {
                     'result': {
@@ -244,7 +244,7 @@ class RestNodeJumpPoints(Resource):
                         
                 node.jumppoints.append(new_jp)
             db.session.commit()
-            publish_events("nodeJumpPoints", node.id)
+            publish_events(reqType="nodeJumpPoints", rid=node_id)
             return {
                     'result': {
                                'node': node.name,
@@ -271,7 +271,7 @@ class RestObstacles(Resource):
         args = self.reqparse.parse_args()
         data = args['obstacles']
         ob_data = json.loads(data)
-        #print "Obstacles" + data
+        print "Obstacles" + data
         newObCount = 0
         for ob in ob_data:  
                                   
@@ -294,6 +294,7 @@ class RestObstacles(Resource):
                 newOb.location = newLocation
                 db.session.add(newOb)  # @UndefinedVariable
                 newObCount = newObCount + 1
+                publish_events(reqType="newObstacle", lat=lat, lon=lon)
                 
         db.session.commit()
                     
