@@ -17,7 +17,8 @@ subscriptions = []
 from main import models
 from main import views
 from main.rest import RestHelloWorld, RestNode, RestNodeList, RestNodeGoals,\
-    RestNodeLocation, RestNodeJumpPoints, RestObstacles, RestNodeForces
+    RestNodeLocation, RestNodeJumpPoints, RestObstacles, RestNodeForces,\
+    RestGoalComplete
 
 # setup RESTful API
 api.add_resource(RestHelloWorld, '/rest/api/hello')
@@ -25,6 +26,7 @@ api.add_resource(RestNodeList, '/rest/api/nodes')
 api.add_resource(RestNode, '/rest/api/nodes/<int:node_id>')
 api.add_resource(RestNodeGoals, '/rest/api/nodes/<int:node_id>/goals')
 api.add_resource(RestNodeLocation, '/rest/api/nodes/<int:node_id>/location')
+api.add_resource(RestGoalComplete, '/rest/api/nodes/<int:node_id>/goalComplete')
 api.add_resource(RestNodeForces, '/rest/api/nodes/<int:node_id>/force')
 api.add_resource(RestNodeJumpPoints, '/rest/api/nodes/<int:node_id>/jumppoints')
 api.add_resource(RestObstacles, '/rest/api/obstacles')

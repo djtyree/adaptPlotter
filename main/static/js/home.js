@@ -29,7 +29,7 @@ utils.findNode = function(series_index,nid) {
 	return node_id;
 };
 
-utils.drawNodeLinks = function() {
+utils.drawNodeLinks = function(obj) {
 	// link followers to leaders
 	$('.nodeLink').remove();
 	$('.nodeVector').remove();
@@ -52,8 +52,8 @@ utils.drawNodeLinks = function() {
     	if(node.speed !== 0.0 || node.dir != 0.0) {
     		x = node.plotX
     		y = node.plotY
-    		newX = Math.cos(((node.dir-90)%360)*Math.PI/180) * (node.speed/3.0*100) + node.plotX
-    		newY = Math.sin(((node.dir-90)%360)*Math.PI/180) * (node.speed/3.0*100) + node.plotY
+    		newX = Math.cos(((obj.dir-90)%360)*Math.PI/180) * (obj.speed/2.0*100) + node.plotX
+    		newY = Math.sin(((obj.dir-90)%360)*Math.PI/180) * (obj.speed/2.0*100) + node.plotY
     		chart.renderer.path(['M',node.plotX + chart.plotLeft, node.plotY + chart.plotTop,
     		                     'L',newX + chart.plotLeft, newY + chart.plotTop]).attr({
     		                    	 'stroke-width': 2,
@@ -65,8 +65,8 @@ utils.drawNodeLinks = function() {
     	if(node.fspeed !== 0.0 || node.fdir != 0.0) {
     		x = node.plotX
     		y = node.plotY
-    		newX = Math.cos(((node.fdir-90)%360)*Math.PI/180) * (node.fspeed/1.0*100) + node.plotX
-    		newY = Math.sin(((node.fdir-90)%360)*Math.PI/180) * (node.fspeed/1.0*100) + node.plotY
+    		newX = Math.cos(((obj.fdir-90)%360)*Math.PI/180) * (obj.fspeed/5.0*100) + node.plotX
+    		newY = Math.sin(((obj.fdir-90)%360)*Math.PI/180) * (obj.fspeed/5.0*100) + node.plotY
     		chart.renderer.path(['M',node.plotX + chart.plotLeft, node.plotY + chart.plotTop,
     		                     'L',newX + chart.plotLeft, newY + chart.plotTop]).attr({
     		                    	 'stroke-width': 2,
@@ -168,8 +168,8 @@ $(function () {
         },
         yAxis: {
         	labels: {enabled:false},
-        	min: 32.995823,
-        	max: 32.997072
+        	min: 32.995820,
+        	max: 32.997070
         	//min:  32.995984,
             //max: 32.997162
         },
@@ -227,7 +227,7 @@ function createEventSource() {
 				node.y = obj.lat			
 				chart.series[series_index].data[series_id].update([obj.lon, obj.lat])
 				chart.series[jp_series].data[0].update([obj.lon, obj.lat])
-				utils.drawNodeLinks()
+				utils.drawNodeLinks(obj)
 			} else if(obj.type == "nodeJumpPoints") {
 				var series_index = chart.series.inArray('Node', "name")
 				var jp_series = chart.series.inArray('Jump Points', "name")

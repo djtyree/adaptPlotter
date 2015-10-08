@@ -77,6 +77,41 @@ class RestNodeList(Resource):
             nodeList['nodes'].append(jsonNode(node));
         return nodeList
             
+
+# RestGoalComplete
+class RestGoalComplete(Resource):
+    def __init__(self):
+        self.reqparse = reqparse.RequestParser()
+        self.reqparse.add_argument('lat')
+        self.reqparse.add_argument('lon')         
+        super(RestGoalComplete, self).__init__()
+            
+    def put(self, node_id):        
+        node = None
+        nodes = Node.query.all()    # @UndefinedVariable
+        for x in nodes:
+            if x.rid == node_id:
+                node = x
+        if node:
+            args = self.reqparse.parse_args()
+            lat = args['lat']
+            lon = args['lon']
+            for goal in node.goals:
+                if str(goal.location.lat) == str(lat) and str(goal.location.lon) == str(lon):
+                    db.session.delete(goal)
+                    db.session.commit()
+                    publish_events(reqType="goalComplete", rid=node_id)
+                    break
+            
+            return {
+                    'result': {
+                               'node': node.name,
+                               'nid': node.id,
+                               'id': node.rid,                                
+                               'msg': 'Goal Successfully Removed' 
+                               }
+                    }
+            
 # RestLocation
 class RestNodeLocation(Resource):
     def __init__(self):
@@ -120,8 +155,8 @@ class RestNodeLocation(Resource):
             #print "Location: lat=" + str(lat) + " lon=" + str(lon)
             #if speed is not None:
             #    print "   - speed= " + str(speed)
-            if dir is not None:
-                print "   - dir= " + str(dir)
+            #if dir is not None:
+            #    print "   - dir= " + str(dir)
             
                       
             node.location.lat = float(lat)
@@ -176,7 +211,7 @@ class RestNodeForces(Resource):
             args = self.reqparse.parse_args()
             fspeed = args['force_speed']
             fdir = args['force_dir']
-            #print "Force: speed=" + fspeed + " dir=" + fdir
+            print "Force: speed=" + fspeed + " dir=" + fdir
             node.force_speed = float(fspeed)
             node.force_dir = float(fdir)
             db.session.commit()

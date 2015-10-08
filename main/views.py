@@ -426,7 +426,7 @@ def publish_events(reqType=None, rid=0, lat=0, lon=0):
                 node = Node.query.get(rid)    # @UndefinedVariable
                 #node = Node.query.get(id)
                 #msg = json.dumps(dict(nid=node.id, rid=node.rid, lat=node.location.lat, lon=node.location.lon))                
-                msg =  json.dumps(dict(type=reqType, nid=node.id, rid=node.rid, lat=node.location.lat, lon=node.location.lon))
+                msg =  json.dumps(dict(type=reqType, nid=node.id, rid=node.rid, lat=node.location.lat, lon=node.location.lon, speed=node.location.speed, dir=node.location.dir, fspeed=node.force_speed, fdir=node.force_dir))
             elif reqType=="nodeJumpPoints":
                 node = Node.query.get(rid)    # @UndefinedVariable
                 #node = Node.query.get(id)
