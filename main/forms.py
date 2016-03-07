@@ -25,6 +25,7 @@ class NodeForm(Form):
     new = HiddenField('New')
     name = TextField('Name',[validators.Required()])
     rid = IntegerField("Robot ID",[validators.Required()])
+    ip = TextField("Robot IP",[validators.Required()])
     leader  = SelectField('Leader', choices=[], coerce=int)
     location = FormField(LocationForm)
     jumppoints = FieldList(FormField(JumpPointForm))

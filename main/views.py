@@ -79,6 +79,7 @@ def addEditNode(node_id):
             form.id.data = node.id
             form.name.data = node.name
             form.rid.data = node.rid
+            form.ip.data = node.ip
             form.location.lat.data = node.location.lat
             form.location.lon.data = node.location.lon
             form.leader.data = node.leader_id    
@@ -94,7 +95,7 @@ def addEditNode(node_id):
             #new node has passed validation, add to db
             location = Location(lat=form.location.lat.data, lon=form.location.lon.data)
             db.session.add(location)  # @UndefinedVariable
-            node = Node(name=form.name.data, leader_id=form.leader.data, location=location, rid=form.rid.data)
+            node = Node(name=form.name.data, leader_id=form.leader.data, location=location, rid=form.rid.data, ip=form.ip.data)
             db.session.add(node)  # @UndefinedVariable
             db.session.commit()  # @UndefinedVariable
             
@@ -128,6 +129,7 @@ def addEditNode(node_id):
             #node has been updated. save updates
             node.name = form.name.data
             node.rid = form.rid.data
+            node.ip = form.ip.data
             location = Location.query.get(node.loc_id)  # @UndefinedVariable
             location.lat = form.location.lat.data
             location.lon = form.location.lon.data
@@ -443,6 +445,10 @@ def publish_events(reqType=None, rid=0, lat=0, lon=0):
                 data.append(ChartPoint(x=lon,y=lat, name='Obstacle').__dict__)
                 jsonstr = {"type": reqType, "data": data}
                 msg = json.dumps(jsonstr)
+                
+            elif reqType=="newNode":  
+                node = Node.query.get(rid) # @UndefinedVariable
+                msg =  json.dumps(dict(type=reqType, nid=node.id, rid=node.rid,lid = node.leader_id, lat=node.location.lat, lon=node.location.lon, speed=node.location.speed, dir=node.location.dir, fspeed=node.force_speed, fdir=node.force_dir))
                 
             if msg is not "":
                 #msg = json.dumps(dict(run=run.id, dce=dce.id, state=state.id, state_name=state.name, start_time=run.start_time))

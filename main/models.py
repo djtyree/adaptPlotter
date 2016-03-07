@@ -38,6 +38,7 @@ class Node(db.Model):
     id = db.Column(db.Integer(), primary_key=True)
     rid = db.Column(db.Integer())
     name = db.Column(db.String(64))
+    ip = db.Column(db.String(64))
     leader_id = db.Column(db.Integer(), db.ForeignKey('node.id'))    
     loc_id = db.Column(db.Integer, db.ForeignKey('location.id'))
     force_dir = db.Column(db.Float, default=0.0) 

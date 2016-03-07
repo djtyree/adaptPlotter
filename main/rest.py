@@ -70,13 +70,68 @@ class RestNodeGoals(Resource):
 # RestNodeList
 # works with all nodes    
 class RestNodeList(Resource):
+    def __init__(self):
+        self.reqparse = reqparse.RequestParser()
+        self.reqparse.add_argument('name')
+        self.reqparse.add_argument('rid')
+        self.reqparse.add_argument('ip')
+        self.reqparse.add_argument('leader')     
+        self.reqparse.add_argument('lat')
+        self.reqparse.add_argument('lon')
+            
     def get(self):        
         nodes = Node.query.all()    # @UndefinedVariable
         nodeList = {'nodes': []}
         for node in nodes:
             nodeList['nodes'].append(jsonNode(node));
         return nodeList
+    
+    def put(self):
+        args = self.reqparse.parse_args()        
+        node = None
+        nodes = Node.query.all()    # @UndefinedVariable
+        node_id = args['rid']
+        for x in nodes:
+            if x.rid == node_id:
+                node = x
+        if node:
+                return {
+                    'result': {
+                               'nid': node.id,
+                               'id': node.rid,                                
+                               'msg': 'Robot with that id already exists!' 
+                               }
+                    }
+        else:
+            new_ip = args['ip']
+            new_lat = args['lat']
+            new_lon = args['lon']
+            new_leader_rid = args['leader']
+            new_name = args['name']
+            new_leader = 0
+            if new_leader_rid != 0:
+                for x in nodes:
+                    if x.id == new_leader_rid:
+                        new_leader = x.id
             
+            
+            #new node has passed validation, add to db
+            location = Location(lat=new_lat, lon=new_lon)
+            db.session.add(location)  # @UndefinedVariable
+            node = Node(name=new_name, leader_id=new_leader, location=location, rid=node_id, ip=new_ip)
+            db.session.add(node)  # @UndefinedVariable
+            db.session.commit()  # @UndefinedVariable
+            publish_events(reqType="newNode", rid=node_id)
+             
+            return {
+                    'result': {
+                               'node': node.name,
+                               'nid': node.id,
+                               'id': node.rid,                                
+                               'msg': 'Node Added' 
+                               }
+                    }
+             
 
 # RestGoalComplete
 class RestGoalComplete(Resource):
