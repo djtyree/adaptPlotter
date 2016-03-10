@@ -181,7 +181,7 @@ def addEditNode(node_id):
                     newgoal.location = location
                     newgoal.position = int(goal['pos']) + 1            
                     db.session.add(newgoal)
-                    node.jumppoints.append(newgoal)
+                    node.goals.append(newgoal)
                 else: 
                     # found existing point. update and remove from delete list
                     savedGoal = Goal.query.get(goal['goal_id'])   # @UndefinedVariable
