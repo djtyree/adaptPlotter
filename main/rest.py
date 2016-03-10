@@ -7,7 +7,7 @@ from flask.ext.restful import Resource, reqparse
 from main import db
 
 # model imports
-from models import Node, JumpPoint, Location, Obstacle
+from models import Node, JumpPoint, Location, Obstacle, Goal
 
 # function imports
 from views import publish_events
@@ -55,7 +55,13 @@ class RestNode(Resource):
             # RestNode
             
 # works with a single node    
-class RestNodeGoals(Resource):              
+class RestNodeGoals(Resource):
+    def __init__(self):
+        self.reqparse = reqparse.RequestParser()     
+        self.reqparse.add_argument('lat')
+        self.reqparse.add_argument('lon')
+        self.reqparse.add_argument('position')
+                      
     def get(self, node_id):
         node = None        
         nodes = Node.query.all()    # @UndefinedVariable
@@ -66,6 +72,43 @@ class RestNodeGoals(Resource):
                     node = x                    
             if node:
                 return {'goals': jsonNodeGoal(node)}
+    def put(self, node_id):
+        node = None        
+        nodes = Node.query.all()    # @UndefinedVariable
+        
+        if nodes:
+            for x in nodes:
+                if x.rid == node_id:
+                    node = x                    
+            if node:
+                args = self.reqparse.parse_args()
+                new_lat = args['lat']
+                new_lon = args['lon']
+                new_pos = args['position']
+                location = Location(lat=new_lat, lon=new_lon)
+                db.session.add(location)  # @UndefinedVariable
+                
+                exisiting_goal_id = 0
+                existing_goal = None
+                for goal in node.goals:
+                    old_pos = goal.position
+                    if int(old_pos) == (int(new_pos)+1):
+                        exisiting_goal_id = goal.id
+                        exisiting_goal = goal
+                
+                if exisiting_goal_id != 0:
+                    db.session.delete(exisiting_goal)
+                
+                newgoal = Goal()
+                newgoal.location = location
+                newgoal.position = int(new_pos) + 1            
+                db.session.add(newgoal)
+                node.goals.append(newgoal)
+                db.session.commit()
+                
+                return {'new_goals': jsonNodeGoal(node)}
+        
+                    
             
 # RestNodeList
 # works with all nodes    
